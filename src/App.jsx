@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import axios from "axios";
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://backend-f4ee.vercel.app/';
+// Use environment variable or fallback to your deployed backend URL
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://backend-f4ee.vercel.app';
 
 function App() {
   const [entries, setEntries] = useState([]);
@@ -18,7 +19,7 @@ function App() {
 
   const fetchEntries = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/entries");
+      const res = await axios.get(`${API_BASE_URL}/entries`);
       console.log('Fetched entries:', res.data);
       setEntries(res.data);
     } catch (err) {
@@ -29,8 +30,8 @@ function App() {
   const handleGetSuggestion = async () => {
     if (!findText || entries.length === 0) return;
     try {
-      const res = await axios.post('http://localhost:5000/suggest', {
-        uid: entries[0].uid, // Use the first entry's UID (or modify to select specific)
+      const res = await axios.post(`${API_BASE_URL}/suggest`, {
+        uid: entries[0].uid,
         findText
       });
       setSuggestion(res.data.suggestion);
@@ -46,7 +47,7 @@ function App() {
       return;
     }
     try {
-      await axios.post("http://localhost:5000/replace", {
+      await axios.post(`${API_BASE_URL}/replace`, {
         uid,
         findText,
         replaceText,
@@ -54,7 +55,7 @@ function App() {
         replaceEmail
       });
       alert("Entry updated successfully!");
-      fetchEntries(); // Refresh the list
+      fetchEntries();
     } catch (err) {
       console.error("Error replacing text:", err);
       alert("Failed to update entry");
