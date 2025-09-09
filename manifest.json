@@ -1,0 +1,28 @@
+{
+  "name": "Smart Find & Replace",
+  "description": "Context-aware find and replace with AI suggestions and brand validation",
+  "version": "1.0.0",
+  "icon": "icon.png",
+  "target": {
+    "type": "field",
+    "field_types": ["text", "rich_text_editor"]
+  },
+  "scope": {
+    "content_types": ["*"],
+    "branches": ["*"],
+    "environments": ["*"]
+  },
+  "config": {
+    "openai_api_key": {
+      "type": "text",
+      "display_name": "OpenAI API Key",
+      "instruction": "Enter your OpenAI API key for AI suggestions"
+    },
+    "brandkit_id": {
+      "type": "text", 
+      "display_name": "Brandkit ID",
+      "instruction": "Enter your Contentstack Brandkit ID"
+    }
+  },
+  "src": "index.html"
+}
