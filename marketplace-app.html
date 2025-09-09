@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Find & Replace</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin: 20px 0;
+        }
+        button {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        .btn-success {
+            background: #059669;
+            color: white;
+        }
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        .suggestion-box {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 6px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+        .suggestion-text {
+            font-style: italic;
+            color: #0369a1;
+            margin-bottom: 8px;
+        }
+        .use-suggestion {
+            background: #0ea5e9;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .status {
+            padding: 12px;
+            border-radius: 6px;
+            margin: 16px 0;
+            font-weight: 500;
+        }
+        .status.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        .status.error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Smart Find & Replace</h1>
+            <p>Context-aware content replacement with AI suggestions</p>
+        </div>
+
+        <div class="form-group">
+            <label for="findText">Find Text</label>
+            <input type="text" id="findText" placeholder="Enter text to find...">
+        </div>
+
+        <div class="form-group">
+            <label for="replaceText">Replace With</label>
+            <input type="text" id="replaceText" placeholder="Enter replacement text...">
+        </div>
+
+        <div class="button-group">
+            <button class="btn-secondary" onclick="getAISuggestion()">✨ Get AI Suggestion</button>
+            <button class="btn-primary" onclick="performReplace()">🔄 Replace</button>
+        </div>
+
+        <div id="suggestionContainer"></div>
+        <div id="statusContainer"></div>
+
+        <div class="form-group">
+            <label for="replaceUrl">Replace URL (optional)</label>
+            <input type="url" id="replaceUrl" placeholder="https://example.com">
+        </div>
+
+        <div class="form-group">
+            <label for="replaceEmail">Replace Email (optional)</label>
+            <input type="email" id="replaceEmail" placeholder="contact@example.com">
+        </div>
+    </div>
+
+    <script>
+        // Contentstack App SDK integration
+        let ContentstackAppSdk;
+        let currentEntry;
+
+        // Initialize the app
+        window.onload = async function() {
+            try {
+                ContentstackAppSdk = await import('https://unpkg.com/@contentstack/app-sdk/dist/index.js');
+                const appSdk = await ContentstackAppSdk.init();
+                currentEntry = await appSdk.location.ContentTypeField.entry.getData();
+                console.log('App initialized with entry:', currentEntry);
+            } catch (error) {
+                console.error('Failed to initialize Contentstack App SDK:', error);
+                // Fallback for development
+                showStatus('Running in development mode', 'error');
+            }
+        };
+
+        async function getAISuggestion() {
+            const findText = document.getElementById('findText').value;
+            if (!findText) {
+                showStatus('Please enter text to find', 'error');
+                return;
+            }
+
+            try {
+                showStatus('Getting AI suggestion...', 'info');
+                
+                const response = await fetch('http://localhost:5000/suggest', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        uid: currentEntry?.uid || 'demo',
+                        findText: findText
+                    })
+                });
+
+                const data = await response.json();
+                if (data.suggestion) {
+                    showSuggestion(data.suggestion);
+                } else {
+                    showStatus('No suggestion available', 'error');
+                }
+            } catch (error) {
+                console.error('Error getting suggestion:', error);
+                showStatus('Failed to get AI suggestion', 'error');
+            }
+        }
+
+        async function performReplace() {
+            const findText = document.getElementById('findText').value;
+            const replaceText = document.getElementById('replaceText').value;
+            const replaceUrl = document.getElementById('replaceUrl').value;
+            const replaceEmail = document.getElementById('replaceEmail').value;
+
+            if (!findText || !replaceText) {
+                showStatus('Please fill in both Find Text and Replace Text', 'error');
+                return;
+            }
+
+            try {
+                showStatus('Performing replacement...', 'info');
+
+                const response = await fetch('http://localhost:5000/replace', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        uid: currentEntry?.uid || 'demo',
+                        findText,
+                        replaceText,
+                        replaceUrl,
+                        replaceEmail
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showStatus('✅ Entry updated successfully!', 'success');
+                    // Refresh the entry in Contentstack
+                    if (ContentstackAppSdk) {
+                        window.location.reload();
+                    }
+                } else {
+                    showStatus(`❌ ${data.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error performing replacement:', error);
+                showStatus('Failed to update entry', 'error');
+            }
+        }
+
+        function showSuggestion(suggestion) {
+            const container = document.getElementById('suggestionContainer');
+            container.innerHTML = `
+                <div class="suggestion-box">
+                    <div class="suggestion-text">💡 AI Suggestion: "${suggestion}"</div>
+                    <button class="use-suggestion" onclick="useSuggestion('${suggestion}')">Use This Suggestion</button>
+                </div>
+            `;
+        }
+
+        function useSuggestion(suggestion) {
+            document.getElementById('replaceText').value = suggestion;
+            document.getElementById('suggestionContainer').innerHTML = '';
+        }
+
+        function showStatus(message, type) {
+            const container = document.getElementById('statusContainer');
+            container.innerHTML = `<div class="status ${type}">${message}</div>`;
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
