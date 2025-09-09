@@ -1,5 +1,8 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
+import './App.css';
 import axios from "axios";
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://backend-f4ee.vercel.app/';
 
 function App() {
   const [entries, setEntries] = useState([]);

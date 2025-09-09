@@ -150,6 +150,9 @@
         let ContentstackAppSdk;
         let currentEntry;
 
+        // API Configuration
+        const API_BASE_URL = 'https://backend-f4ee.vercel.app/';
+
         // Initialize the app
         window.onload = async function() {
             try {
@@ -174,7 +177,7 @@
             try {
                 showStatus('Getting AI suggestion...', 'info');
                 
-                const response = await fetch('http://localhost:5000/suggest', {
+                const response = await fetch(API_BASE_URL + '/entries', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -209,7 +212,7 @@
             try {
                 showStatus('Performing replacement...', 'info');
 
-                const response = await fetch('http://localhost:5000/replace', {
+                const response = await fetch(API_BASE_URL + '/replace', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
