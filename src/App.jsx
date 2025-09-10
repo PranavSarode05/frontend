@@ -18,7 +18,7 @@ function App() {
 
   const fetchEntries = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/entries");
+      const res = await axios.get(`${API_BASE_URL}entries`);
       console.log('Fetched entries:', res.data);
       setEntries(res.data);
     } catch (err) {
@@ -29,7 +29,7 @@ function App() {
   const handleGetSuggestion = async () => {
     if (!findText || entries.length === 0) return;
     try {
-      const res = await axios.post('http://localhost:5000/suggest', {
+      const res = await axios.post(`${API_BASE_URL}suggest`, {
         uid: entries[0].uid, // Use the first entry's UID (or modify to select specific)
         findText
       });
@@ -46,7 +46,7 @@ function App() {
       return;
     }
     try {
-      await axios.post("http://localhost:5000/replace", {
+      await axios.post(`${API_BASE_URL}replace`, {
         uid,
         findText,
         replaceText,
