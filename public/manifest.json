@@ -13,7 +13,7 @@
         "meta": [
           {
             "name": "Smart Find/Replace",
-            "path": "/full-page",
+            "path": "/",
             "signed": false,
             "enabled": true,
             "required": false
