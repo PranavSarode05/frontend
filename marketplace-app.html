@@ -19,15 +19,20 @@
             padding: 24px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-    </style>
-    <link rel="stylesheet" href="styles.css">
-</head>
-    <body>
-        <div class="container">
-            <div class="header">
-                <h1>🔍 Smart Find & Replace</h1>
-                <p>Context-aware content replacement with AI suggestions</p>
-            </div>
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .header h1 {
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        .header p {
+            color: #6b7280;
+            margin: 0;
+        }
+        .form-group {
+            margin-bottom: 20px;
         }
         label {
             display: block;
@@ -73,6 +78,11 @@
             opacity: 0.9;
             transform: translateY(-1px);
         }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
         .suggestion-box {
             background: #f0f9ff;
             border: 1px solid #0ea5e9;
@@ -110,6 +120,11 @@
             color: #dc2626;
             border: 1px solid #fecaca;
         }
+        .status.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
     </style>
 </head>
 <body>
@@ -130,8 +145,8 @@
         </div>
 
         <div class="button-group">
-            <button class="btn-secondary" onclick="getAISuggestion()">✨ Get AI Suggestion</button>
-            <button class="btn-primary" onclick="performReplace()">🔄 Replace</button>
+            <button class="btn-secondary" id="suggestBtn" onclick="getAISuggestion()">✨ Get AI Suggestion</button>
+            <button class="btn-primary" id="replaceBtn" onclick="performReplace()">🔄 Replace</button>
         </div>
 
         <div id="suggestionContainer"></div>
@@ -148,107 +163,169 @@
         </div>
     </div>
 
-    <script>
-        // Contentstack App SDK integration
-        let ContentstackAppSdk;
-        let currentEntry;
+    <!-- Contentstack App SDK -->
+    <script src="https://unpkg.com/@contentstack/app-sdk/dist/index.js"></script>
 
-        // API Configuration
-        const API_BASE_URL = 'https://backend-f4ee.vercel.app';
+    <script>
+        // Global variables
+        let appSdk = null;
+        let currentEntry = null;
+        let BACKEND_URL = 'https://backend-f4ee.vercel.app'; // Fallback URL
 
         // Initialize the app
         window.onload = async function() {
             try {
-                ContentstackAppSdk = await import('https://unpkg.com/@contentstack/app-sdk/dist/index.js');
-                const appSdk = await ContentstackAppSdk.init();
-                currentEntry = await appSdk.location.ContentTypeField.entry.getData();
-                console.log('App initialized with entry:', currentEntry);
+                // Initialize Contentstack App SDK
+                appSdk = await ContentstackAppSDK.init();
+                
+                // Get app configuration for backend URL
+                try {
+                    const config = await appSdk.getConfig();
+                    if (config && config.backend_url) {
+                        BACKEND_URL = config.backend_url;
+                    }
+                    console.log('Backend URL configured:', BACKEND_URL);
+                } catch (configError) {
+                    console.warn('Using fallback backend URL:', BACKEND_URL);
+                }
+
+                // Get current entry data
+                try {
+                    currentEntry = await appSdk.location.ContentTypeField.entry.getData();
+                    console.log('App initialized with entry:', currentEntry);
+                    showStatus('✅ App initialized successfully', 'success');
+                } catch (entryError) {
+                    console.warn('Could not get entry data, using demo mode');
+                    showStatus('⚠️ Running in demo mode', 'info');
+                }
+
             } catch (error) {
                 console.error('Failed to initialize Contentstack App SDK:', error);
-                // Fallback for development
-                showStatus('Running in development mode', 'error');
+                showStatus('⚠️ Running in development mode', 'info');
             }
         };
 
         async function getAISuggestion() {
-            const findText = document.getElementById('findText').value;
+            const findText = document.getElementById('findText').value.trim();
             if (!findText) {
-                showStatus('Please enter text to find', 'error');
+                showStatus('❌ Please enter text to find', 'error');
                 return;
             }
 
+            const suggestBtn = document.getElementById('suggestBtn');
+            
             try {
-                showStatus('Getting AI suggestion...', 'info');
+                // Disable button and show loading
+                suggestBtn.disabled = true;
+                suggestBtn.textContent = '⏳ Getting suggestion...';
+                showStatus('🤖 AI is analyzing your text...', 'info');
                 
-                const response = await fetch(API_BASE_URL + '/entries', {
+                // Use the correct /suggest endpoint
+                const response = await fetch(`${BACKEND_URL}/suggest`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
                     body: JSON.stringify({
-                        uid: currentEntry?.uid || 'demo',
+                        uid: currentEntry?.uid || 'demo-entry',
                         findText: findText
                     })
                 });
 
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
                 const data = await response.json();
+                
                 if (data.suggestion) {
                     showSuggestion(data.suggestion);
+                    showStatus('✨ AI suggestion generated!', 'success');
                 } else {
-                    showStatus('No suggestion available', 'error');
+                    showStatus('❌ No suggestion available', 'error');
                 }
+
             } catch (error) {
                 console.error('Error getting suggestion:', error);
-                showStatus('Failed to get AI suggestion', 'error');
+                showStatus(`❌ Failed to get AI suggestion: ${error.message}`, 'error');
+            } finally {
+                // Re-enable button
+                suggestBtn.disabled = false;
+                suggestBtn.textContent = '✨ Get AI Suggestion';
             }
         }
 
         async function performReplace() {
-            const findText = document.getElementById('findText').value;
-            const replaceText = document.getElementById('replaceText').value;
-            const replaceUrl = document.getElementById('replaceUrl').value;
-            const replaceEmail = document.getElementById('replaceEmail').value;
+            const findText = document.getElementById('findText').value.trim();
+            const replaceText = document.getElementById('replaceText').value.trim();
+            const replaceUrl = document.getElementById('replaceUrl').value.trim();
+            const replaceEmail = document.getElementById('replaceEmail').value.trim();
 
             if (!findText || !replaceText) {
-                showStatus('Please fill in both Find Text and Replace Text', 'error');
+                showStatus('❌ Please fill in both Find Text and Replace Text', 'error');
                 return;
             }
 
-            try {
-                showStatus('Performing replacement...', 'info');
+            const replaceBtn = document.getElementById('replaceBtn');
 
-                const response = await fetch(API_BASE_URL + '/replace', {
+            try {
+                // Disable button and show loading
+                replaceBtn.disabled = true;
+                replaceBtn.textContent = '⏳ Replacing...';
+                showStatus('🔄 Performing smart replacement...', 'info');
+
+                const response = await fetch(`${BACKEND_URL}/replace`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
                     body: JSON.stringify({
-                        uid: currentEntry?.uid || 'demo',
+                        uid: currentEntry?.uid || 'demo-entry',
                         findText,
                         replaceText,
-                        replaceUrl,
-                        replaceEmail
+                        replaceUrl: replaceUrl || undefined,
+                        replaceEmail: replaceEmail || undefined
                     })
                 });
 
-                const data = await response.json();
-                if (response.ok) {
-                    showStatus('✅ Entry updated successfully!', 'success');
-                    // Refresh the entry in Contentstack
-                    if (ContentstackAppSdk) {
-                        window.location.reload();
-                    }
-                } else {
-                    showStatus(`❌ ${data.error}`, 'error');
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
                 }
+
+                const data = await response.json();
+                showStatus('✅ Entry updated and published successfully!', 'success');
+                
+                // Clear form
+                clearForm();
+                
+                // Refresh the entry in Contentstack if possible
+                if (appSdk) {
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                }
+
             } catch (error) {
                 console.error('Error performing replacement:', error);
-                showStatus('Failed to update entry', 'error');
+                showStatus(`❌ Failed to update entry: ${error.message}`, 'error');
+            } finally {
+                // Re-enable button
+                replaceBtn.disabled = false;
+                replaceBtn.textContent = '🔄 Replace';
             }
         }
 
         function showSuggestion(suggestion) {
             const container = document.getElementById('suggestionContainer');
+            // Escape HTML to prevent XSS
+            const escapedSuggestion = escapeHtml(suggestion);
             container.innerHTML = `
                 <div class="suggestion-box">
-                    <div class="suggestion-text">💡 AI Suggestion: "${suggestion}"</div>
-                    <button class="use-suggestion" onclick="useSuggestion('${suggestion}')">Use This Suggestion</button>
+                    <div class="suggestion-text">💡 AI Suggestion: "${escapedSuggestion}"</div>
+                    <button class="use-suggestion" onclick="useSuggestion('${escapedSuggestion}')">Use This Suggestion</button>
                 </div>
             `;
         }
@@ -256,15 +333,55 @@
         function useSuggestion(suggestion) {
             document.getElementById('replaceText').value = suggestion;
             document.getElementById('suggestionContainer').innerHTML = '';
+            showStatus('✅ Suggestion applied!', 'success');
         }
 
-        function showStatus(message, type) {
+        function showStatus(message, type = 'info') {
             const container = document.getElementById('statusContainer');
             container.innerHTML = `<div class="status ${type}">${message}</div>`;
-            setTimeout(() => {
-                container.innerHTML = '';
-            }, 5000);
+            
+            // Auto-clear success/info messages after 5 seconds
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    if (container.innerHTML.includes(message)) {
+                        container.innerHTML = '';
+                    }
+                }, 5000);
+            }
         }
+
+        function clearForm() {
+            document.getElementById('findText').value = '';
+            document.getElementById('replaceText').value = '';
+            document.getElementById('replaceUrl').value = '';
+            document.getElementById('replaceEmail').value = '';
+            document.getElementById('suggestionContainer').innerHTML = '';
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey || event.metaKey) {
+                switch(event.key) {
+                    case 'Enter':
+                        event.preventDefault();
+                        performReplace();
+                        break;
+                    case 's':
+                        event.preventDefault();
+                        getAISuggestion();
+                        break;
+                }
+            }
+        });
     </script>
 </body>
 </html>
