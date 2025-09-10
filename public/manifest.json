@@ -1,38 +1,49 @@
 {
-  "id": "smart-find-replace-app",
-  "title": "Smart Find & Replace",
-  "author": "Pranav Sarode",
-  "description": "A Contentstack Marketplace app to find and replace text in entries with AI suggestions and brand guidelines.",
-  "version": "1.0.0",
-  "location": {
-    "app": {
-      "url": "https://frontend-app.eu-contentstackapps.com/marketplace-app.html",
-      "type": "full_page"
-    }
-  },
-  "permissions": [
-    {
-      "name": "content_types:read",
-      "description": "Read content types"
-    },
-    {
-      "name": "entries:read",
-      "description": "Read entries"
-    },
-    {
-      "name": "entries:edit",
-      "description": "Edit entries"
-    },
-    {
-      "name": "entries:publish",
-      "description": "Publish entries"
-    }
-  ],
-  "dependencies": [],
-  "content_types": [
-    {
-      "uid": "article",
-      "title": "Article"
-    }
-  ]
+	"uid": "68c06cad8330be0012c28299",
+	"name": "Smart Find/Replace",
+	"description": "",
+	"target_type": "stack",
+	"visibility": "private",
+	"version": 3,
+	"icon": "",
+	"ui_location": {
+		"signed": false,
+		"base_url": "https://frontend-app.eu-contentstackapps.com",
+		"locations": [
+			{
+				"type": "cs.cm.stack.full_page",
+				"meta": [
+					{
+						"uid": "68c123441ace2b0d0e3bede5",
+						"name": "Smart Find/Replace",
+						"path": "/full-page",
+						"signed": false,
+						"enabled": true,
+						"required": false
+					}
+				]
+			}
+		]
+	},
+	"oauth": {
+		"client_id": "j_rBw2e73cO9TBqx",
+		"client_secret": "HAP8bE8jVYaM4ZBAN2BlG-H0WqXjtj1Z",
+		"redirect_uri": "https://example.com/oauth/callback",
+		"user_token_config": {
+			"enabled": false,
+			"scopes": [],
+			"allow_pkce": false
+		},
+		"app_token_config": {
+			"enabled": false,
+			"scopes": []
+		}
+	},
+	"group": "user",
+	"hosting": {
+		"provider": "launch",
+		"deployment_url": "https://frontend-app.eu-contentstackapps.com",
+		"environment_uid": "68bfd15a2bfbbdcc1f867dfb",
+		"project_uid": "68bfd15a2bfbbdcc1f867df4"
+	}
 }
