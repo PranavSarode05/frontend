@@ -167,36 +167,45 @@
     <script src="https://unpkg.com/@contentstack/app-sdk/dist/index.js"></script>
 
     <script>
-        // Global variables
+        // Global variables - ALWAYS INITIALIZED TO PREVENT UNDEFINED ERRORS
         let appSdk = null;
         let currentEntry = null;
-        let BACKEND_URL = 'https://backend-f4ee.vercel.app'; // Fallback URL
+        let BACKEND_URL = 'https://backend-f4ee.vercel.app'; // Fallback URL - NEVER undefined
 
         // Initialize the app
         window.onload = async function() {
+            console.log('Initializing Smart Find & Replace App...');
+            
             try {
                 // Initialize Contentstack App SDK
-                appSdk = await ContentstackAppSDK.init();
-                
-                // Get app configuration for backend URL
-                try {
-                    const config = await appSdk.getConfig();
-                    if (config && config.backend_url) {
-                        BACKEND_URL = config.backend_url;
+                if (typeof ContentstackAppSDK !== 'undefined') {
+                    appSdk = await ContentstackAppSDK.init();
+                    console.log('App SDK initialized successfully');
+                    
+                    // Get app configuration for backend URL
+                    try {
+                        const config = await appSdk.getConfig();
+                        if (config && config.backend_url) {
+                            BACKEND_URL = config.backend_url;
+                            console.log('Using configured backend URL:', BACKEND_URL);
+                        } else {
+                            console.log('No backend URL in config, using fallback:', BACKEND_URL);
+                        }
+                    } catch (configError) {
+                        console.warn('Could not get config, using fallback URL:', BACKEND_URL);
                     }
-                    console.log('Backend URL configured:', BACKEND_URL);
-                } catch (configError) {
-                    console.warn('Using fallback backend URL:', BACKEND_URL);
-                }
 
-                // Get current entry data
-                try {
-                    currentEntry = await appSdk.location.ContentTypeField.entry.getData();
-                    console.log('App initialized with entry:', currentEntry);
-                    showStatus('✅ App initialized successfully', 'success');
-                } catch (entryError) {
-                    console.warn('Could not get entry data, using demo mode');
-                    showStatus('⚠️ Running in demo mode', 'info');
+                    // Get current entry data
+                    try {
+                        currentEntry = await appSdk.location.ContentTypeField.entry.getData();
+                        console.log('Entry data loaded:', currentEntry);
+                        showStatus('✅ App initialized successfully', 'success');
+                    } catch (entryError) {
+                        console.warn('Could not get entry data, using demo mode');
+                        showStatus('⚠️ Running in demo mode', 'info');
+                    }
+                } else {
+                    throw new Error('ContentstackAppSDK not available');
                 }
 
             } catch (error) {
@@ -220,6 +229,8 @@
                 suggestBtn.textContent = '⏳ Getting suggestion...';
                 showStatus('🤖 AI is analyzing your text...', 'info');
                 
+                console.log('Making API request to:', `${BACKEND_URL}/suggest`);
+                
                 // Use the correct /suggest endpoint
                 const response = await fetch(`${BACKEND_URL}/suggest`, {
                     method: 'POST',
@@ -233,11 +244,15 @@
                     })
                 });
 
+                console.log('API response status:', response.status);
+
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
                 }
 
                 const data = await response.json();
+                console.log('API response data:', data);
                 
                 if (data.suggestion) {
                     showSuggestion(data.suggestion);
@@ -275,6 +290,8 @@
                 replaceBtn.textContent = '⏳ Replacing...';
                 showStatus('🔄 Performing smart replacement...', 'info');
 
+                console.log('Making replace request to:', `${BACKEND_URL}/replace`);
+
                 const response = await fetch(`${BACKEND_URL}/replace`, {
                     method: 'POST',
                     headers: { 
@@ -290,12 +307,16 @@
                     })
                 });
 
+                console.log('Replace response status:', response.status);
+
                 if (!response.ok) {
-                    const errorData = await response.json();
+                    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
                     throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
                 }
 
                 const data = await response.json();
+                console.log('Replace response data:', data);
+                
                 showStatus('✅ Entry updated and published successfully!', 'success');
                 
                 // Clear form
