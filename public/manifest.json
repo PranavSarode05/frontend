@@ -1,49 +1,115 @@
 {
-	"uid": "68c06cad8330be0012c28299",
-	"name": "Smart Find/Replace",
-	"description": "",
-	"target_type": "stack",
-	"visibility": "private",
-	"version": 3,
-	"icon": "",
-	"ui_location": {
-		"signed": false,
-		"base_url": "https://frontend-app.eu-contentstackapps.com",
-		"locations": [
-			{
-				"type": "cs.cm.stack.full_page",
-				"meta": [
-					{
-						"uid": "68c123441ace2b0d0e3bede5",
-						"name": "Smart Find/Replace",
-						"path": "/full-page",
-						"signed": false,
-						"enabled": true,
-						"required": false
-					}
-				]
-			}
-		]
-	},
-	"oauth": {
-		"client_id": "j_rBw2e73cO9TBqx",
-		"client_secret": "HAP8bE8jVYaM4ZBAN2BlG-H0WqXjtj1Z",
-		"redirect_uri": "https://example.com/oauth/callback",
-		"user_token_config": {
-			"enabled": false,
-			"scopes": [],
-			"allow_pkce": false
-		},
-		"app_token_config": {
-			"enabled": false,
-			"scopes": []
-		}
-	},
-	"group": "user",
-	"hosting": {
-		"provider": "launch",
-		"deployment_url": "https://frontend-app.eu-contentstackapps.com",
-		"environment_uid": "68bfd15a2bfbbdcc1f867dfb",
-		"project_uid": "68bfd15a2bfbbdcc1f867df4"
-	}
+  "name": "Smart Find/Replace",
+  "description": "",
+  "version": "3.0.0",
+  "icon": "",
+  "target": {
+    "type": "stack"
+  },
+  "ui_location": {
+    "locations": [
+      {
+        "type": "cs.cm.stack.full_page",
+        "meta": [
+          {
+            "name": "Smart Find/Replace",
+            "path": "/full-page",
+            "signed": false,
+            "enabled": true,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  "scope": {
+    "content_types": ["*"],
+    "branches": ["*"],
+    "environments": ["*"]
+  },
+  "config": {
+    "openai_api_key": {
+      "type": "text",
+      "display_name": "OpenAI API Key",
+      "instruction": "Enter your OpenAI API key for AI suggestions"
+    },
+    "brandkit_id": {
+      "type": "text", 
+      "display_name": "Brandkit ID",
+      "instruction": "Enter your Contentstack Brandkit ID"
+    }
+  },
+  "content_security_policy": {
+    "script-src": [
+      "'self'",
+      "'unsafe-inline'",
+      "'unsafe-eval'",
+      "*.csnonprod.com",
+      "*.contentstack.com",
+      "*.contentstack.io",
+      "*.google-analytics.com",
+      "https://*.salesforce-sites.com",
+      "https://*.force.com",
+      "https://*.jquery.com",
+      "https://*.salesforceliveagent.com",
+      "https://*.salesforce.com",
+      "https://*.cdn.apollographql.com",
+      "https://code.jquery.com",
+      "https://*.bootstrapcdn.com",
+      "https://cdnjs.cloudflare.com",
+      "https://cdn.heapanalytics.com",
+      "https://fast.appcues.com",
+      "https://fast.appcues.net",
+      "https://googletagmanager.com",
+      "https://js.intercomcdn.com",
+      "https://service.force.com",
+      "https://tagmanager.google.com",
+      "https://www.googletagmanager.com",
+      "https://widget.intercom.io",
+      "https://widget.usersnap.com",
+      "https://resources.usersnap.com",
+      "https://service.force.com",
+      "https://stats.pusher.com",
+      "https://api.commandbar.com",
+      "https://unpkg.com",
+      "https://frames-commandbar-prod.commandbar.com",
+      "https://cdn.commandbar.com",
+      "https://t.contentsquare.net"
+    ],
+    "connect-src": [
+      "'self'",
+      "*.csnonprod.com",
+      "*.contentstack.com",
+      "*.contentstack.io",
+      "https://*.salesforce-sites.com",
+      "https://*.force.com",
+      "https://*.jquery.com",
+      "https://*.salesforceliveagent.com",
+      "https://*.salesforce.com",
+      "https://*.cdn.apollographql.com",
+      "https://code.jquery.com",
+      "https://*.bootstrapcdn.com",
+      "https://cdnjs.cloudflare.com",
+      "https://cdn.heapanalytics.com",
+      "https://fast.appcues.com",
+      "https://fast.appcues.net",
+      "https://googletagmanager.com",
+      "https://js.intercomcdn.com",
+      "https://service.force.com",
+      "https://tagmanager.google.com",
+      "https://www.googletagmanager.com",
+      "https://widget.intercom.io",
+      "https://widget.usersnap.com",
+      "https://resources.usersnap.com",
+      "https://service.force.com",
+      "https://stats.pusher.com",
+      "https://api.commandbar.com",
+      "https://unpkg.com",
+      "https://frames-commandbar-prod.commandbar.com",
+      "https://cdn.commandbar.com",
+      "https://t.contentsquare.net",
+      "https://backend-f4ee.vercel.app"
+    ]
+  },
+  "src": "index.html"
 }
