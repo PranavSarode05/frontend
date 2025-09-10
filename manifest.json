@@ -1,28 +1,38 @@
 {
-  "name": "Smart Find & Replace",
-  "description": "Context-aware find and replace with AI suggestions and brand validation",
+  "id": "smart-find-replace-app",
+  "title": "Smart Find & Replace",
+  "author": "Pranav Sarode",
+  "description": "A Contentstack Marketplace app to find and replace text in entries with AI suggestions and brand guidelines.",
   "version": "1.0.0",
-  "icon": "icon.png",
-  "target": {
-    "type": "field",
-    "field_types": ["text", "rich_text_editor"]
-  },
-  "scope": {
-    "content_types": ["*"],
-    "branches": ["*"],
-    "environments": ["*"]
-  },
-  "config": {
-    "openai_api_key": {
-      "type": "text",
-      "display_name": "OpenAI API Key",
-      "instruction": "Enter your OpenAI API key for AI suggestions"
-    },
-    "brandkit_id": {
-      "type": "text", 
-      "display_name": "Brandkit ID",
-      "instruction": "Enter your Contentstack Brandkit ID"
+  "location": {
+    "app": {
+      "url": "https://frontend-app.eu-contentstackapps.com/marketplace-app.html",
+      "type": "full_page"
     }
   },
-  "src": "index.html"
+  "permissions": [
+    {
+      "name": "content_types:read",
+      "description": "Read content types"
+    },
+    {
+      "name": "entries:read",
+      "description": "Read entries"
+    },
+    {
+      "name": "entries:edit",
+      "description": "Edit entries"
+    },
+    {
+      "name": "entries:publish",
+      "description": "Publish entries"
+    }
+  ],
+  "dependencies": [],
+  "content_types": [
+    {
+      "uid": "article",
+      "title": "Article"
+    }
+  ]
 }
