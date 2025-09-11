@@ -216,7 +216,7 @@ button:disabled {
     }
 }
 
-.debug-info {
+.debug-panel {
     background: #f8f9fa;
     border: 1px solid #dee2e6;
     border-radius: 8px;
@@ -224,55 +224,45 @@ button:disabled {
     margin-bottom: 20px;
     font-family: 'Courier New', monospace;
     font-size: 12px;
+    max-height: 200px;
+    overflow-y: auto;
 }
 
-.detailed-instructions {
-    margin-top: 20px;
-    padding: 20px;
-    background: #e7f3ff;
+.debug-toggle {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    margin-top: 10px;
+}
+
+.error-instructions {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
     border-radius: 8px;
-    border-left: 4px solid #0066cc;
+    padding: 20px;
+    margin: 20px 0;
 }
 
-.detailed-instructions ol {
-    margin: 10px 0;
+.step-by-step ol {
+    margin: 15px 0;
     padding-left: 25px;
 }
 
-.detailed-instructions li {
+.step-by-step li {
     margin-bottom: 8px;
     line-height: 1.5;
 }
 
-.warning {
-    background: #fff3cd;
-    border: 1px solid #ffeaa7;
-    border-radius: 6px;
-    padding: 15px;
-    margin: 15px 0;
-    color: #856404;
-    font-weight: 600;
-}
-
-.troubleshooting {
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
+.warning-box {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
     border-radius: 6px;
     padding: 15px;
     margin-top: 15px;
+    color: #721c24;
+    font-weight: 600;
 }
-
-.troubleshooting h4 {
-    margin: 0 0 10px 0;
-    color: #495057;
-}
-
-.troubleshooting ul {
-    margin: 0;
-    padding-left: 20px;
-}
-
-.troubleshooting li {
-    margin-bottom: 5px;
-}
-

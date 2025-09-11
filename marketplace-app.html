@@ -10,18 +10,15 @@
     <div class="container">
         <div class="header">
             <h1>🔍 Smart Find & Replace</h1>
-            <p>Context-aware content replacement with AI suggestions</p>
+            <p>AI-powered find and replace for Contentstack entries</p>
         </div>
         
-        <div class="debug-info" id="debugInfo">
-            <h4>🔧 Debug Info:</h4>
-            <div id="debugDetails">Initializing...</div>
+        <div class="debug-panel" id="debugPanel">
+            <h4>🔧 Debug Information</h4>
+            <div id="debugOutput">Initializing...</div>
+            <button onclick="toggleDebug()" class="debug-toggle">Hide Debug</button>
         </div>
         
-        <div class="app-status" id="appStatus">
-            <div class="status info">🔄 Initializing app...</div>
-        </div>
-
         <div id="appContent" style="display: none;">
             <div class="form-group">
                 <label for="findText">Find Text:</label>
@@ -39,9 +36,25 @@
             </div>
             
             <div id="status"></div>
-
             <div class="entry-info">
                 <small>Working with entry: <span id="entryUID">Loading...</span></small>
+            </div>
+        </div>
+
+        <div class="error-instructions" id="errorInstructions" style="display: none;">
+            <h3>❌ App Not in Entry Context</h3>
+            <div class="step-by-step">
+                <h4>Follow these exact steps:</h4>
+                <ol>
+                    <li>Go to <strong>"Content Types"</strong> in your Contentstack navigation</li>
+                    <li>Click on any content type (Article, Blog, etc.)</li>
+                    <li><strong>Open an existing entry</strong> or create new entry</li>
+                    <li>Look for <strong>"Smart Find Replace"</strong> in the RIGHT sidebar</li>
+                    <li>If not visible, check your app installation</li>
+                </ol>
+            </div>
+            <div class="warning-box">
+                <strong>⚠️ Important:</strong> This app ONLY works inside entry editing pages, not on dashboards or listing pages.
             </div>
         </div>
     </div>
@@ -53,168 +66,112 @@
         let currentEntry = null;
         let entryUID = null;
 
-        function updateDebugInfo(info) {
-            document.getElementById('debugDetails').innerHTML = info;
+        function debugLog(message) {
+            console.log(message);
+            document.getElementById('debugOutput').innerHTML += `<div>${message}</div>`;
         }
 
-        // Initialize the app with extensive debugging
+        function toggleDebug() {
+            const panel = document.getElementById('debugPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Enhanced initialization with comprehensive debugging
         window.onload = async function() {
-            console.log('🚀 Starting app initialization...');
-            updateDebugInfo('Starting app initialization...');
+            debugLog('🚀 Starting app initialization...');
             
             try {
-                // Check if SDK is available
+                // Check SDK availability
                 if (typeof ContentstackAppSDK === 'undefined') {
-                    throw new Error('ContentstackAppSDK not loaded');
+                    throw new Error('ContentstackAppSDK not available');
                 }
-                
-                updateDebugInfo('SDK available, initializing...');
-                console.log('📦 SDK available, initializing...');
-                
-                // Initialize Contentstack App SDK
+                debugLog('✅ ContentstackAppSDK available');
+
+                // Initialize SDK
                 appSdk = await ContentstackAppSDK.init();
-                console.log('✅ App SDK initialized successfully');
-                updateDebugInfo('SDK initialized successfully');
+                debugLog('✅ SDK initialized successfully');
                 
-                // Debug: Check location object
-                console.log('📍 Location object:', appSdk.location);
-                updateDebugInfo(`Location type: ${typeof appSdk.location}`);
+                // Debug location object
+                debugLog(`📍 Location object: ${JSON.stringify(Object.keys(appSdk.location || {}))}`);
                 
-                // Check if we're in the right location
                 if (!appSdk.location) {
-                    throw new Error('No location object available');
+                    throw new Error('No location object - app not in proper context');
                 }
-                
-                // Multiple approaches to get entry data
-                let entryData = null;
-                let method = 'unknown';
-                
-                // Method 1: Direct entry access
+
+                // Method 1: Try ContentTypeField.entry
+                let entryFound = false;
                 try {
                     if (appSdk.location.ContentTypeField && appSdk.location.ContentTypeField.entry) {
-                        console.log('🎯 Trying Method 1: ContentTypeField.entry');
-                        entryData = await appSdk.location.ContentTypeField.entry.getData();
-                        method = 'ContentTypeField.entry';
-                        console.log('📄 Method 1 result:', entryData);
+                        debugLog('🎯 Attempting ContentTypeField.entry.getData()');
+                        currentEntry = await appSdk.location.ContentTypeField.entry.getData();
+                        if (currentEntry && currentEntry.uid) {
+                            entryUID = currentEntry.uid;
+                            entryFound = true;
+                            debugLog(`✅ Entry found via ContentTypeField: ${entryUID}`);
+                        }
                     }
                 } catch (e) {
-                    console.warn('Method 1 failed:', e.message);
+                    debugLog(`❌ ContentTypeField method failed: ${e.message}`);
                 }
-                
-                // Method 2: RTE field access
-                if (!entryData) {
+
+                // Method 2: Try RTE.entry (fallback)
+                if (!entryFound) {
                     try {
                         if (appSdk.location.RTE && appSdk.location.RTE.entry) {
-                            console.log('🎯 Trying Method 2: RTE.entry');
-                            entryData = await appSdk.location.RTE.entry.getData();
-                            method = 'RTE.entry';
-                            console.log('📄 Method 2 result:', entryData);
+                            debugLog('🎯 Attempting RTE.entry.getData()');
+                            currentEntry = await appSdk.location.RTE.entry.getData();
+                            if (currentEntry && currentEntry.uid) {
+                                entryUID = currentEntry.uid;
+                                entryFound = true;
+                                debugLog(`✅ Entry found via RTE: ${entryUID}`);
+                            }
                         }
                     } catch (e) {
-                        console.warn('Method 2 failed:', e.message);
+                        debugLog(`❌ RTE method failed: ${e.message}`);
                     }
                 }
-                
-                // Method 3: Custom field access
-                if (!entryData) {
+
+                // Method 3: Try CustomField.entry (fallback)
+                if (!entryFound) {
                     try {
                         if (appSdk.location.CustomField && appSdk.location.CustomField.entry) {
-                            console.log('🎯 Trying Method 3: CustomField.entry');
-                            entryData = await appSdk.location.CustomField.entry.getData();
-                            method = 'CustomField.entry';
-                            console.log('📄 Method 3 result:', entryData);
+                            debugLog('🎯 Attempting CustomField.entry.getData()');
+                            currentEntry = await appSdk.location.CustomField.entry.getData();
+                            if (currentEntry && currentEntry.uid) {
+                                entryUID = currentEntry.uid;
+                                entryFound = true;
+                                debugLog(`✅ Entry found via CustomField: ${entryUID}`);
+                            }
                         }
                     } catch (e) {
-                        console.warn('Method 3 failed:', e.message);
+                        debugLog(`❌ CustomField method failed: ${e.message}`);
                     }
                 }
-                
-                // Method 4: Direct stack query (fallback)
-                if (!entryData) {
-                    try {
-                        console.log('🎯 Trying Method 4: Stack query fallback');
-                        // Get URL parameters to extract entry UID
-                        const urlParams = new URLSearchParams(window.location.search);
-                        const possibleUID = urlParams.get('entry_uid') || urlParams.get('uid');
-                        
-                        if (possibleUID) {
-                            entryData = { uid: possibleUID };
-                            method = 'URL parameters';
-                            console.log('📄 Method 4 result:', entryData);
-                        }
-                    } catch (e) {
-                        console.warn('Method 4 failed:', e.message);
-                    }
-                }
-                
-                // Check if we got entry data
-                if (entryData && entryData.uid) {
-                    entryUID = entryData.uid;
-                    currentEntry = entryData;
-                    
-                    console.log(`✅ Entry UID found via ${method}:`, entryUID);
-                    updateDebugInfo(`✅ Entry UID: ${entryUID} (via ${method})`);
-                    
-                    showAppStatus(`✅ Connected to entry: ${entryUID}`, 'success');
+
+                if (entryFound) {
+                    debugLog(`🎉 Successfully found entry: ${entryUID}`);
                     enableApp();
-                    
                 } else {
-                    console.error('❌ No entry UID found with any method');
-                    updateDebugInfo('❌ No entry UID found with any method');
-                    throw new Error('No entry context available');
+                    throw new Error('No entry UID found with any method');
                 }
-                
+
             } catch (error) {
-                console.error('💥 App initialization failed:', error);
-                updateDebugInfo(`❌ Error: ${error.message}`);
-                
-                showAppStatus('❌ This app must be used within a Contentstack entry sidebar. Please follow these steps:', 'error');
-                showDetailedInstructions();
+                debugLog(`💥 Initialization failed: ${error.message}`);
+                showError();
             }
         };
 
         function enableApp() {
-            document.getElementById('debugInfo').style.display = 'none';
-            document.getElementById('appStatus').style.display = 'none';
+            document.getElementById('debugPanel').style.display = 'none';
             document.getElementById('appContent').style.display = 'block';
             document.getElementById('entryUID').textContent = entryUID;
         }
 
-        function showAppStatus(message, type) {
-            const statusDiv = document.getElementById('appStatus');
-            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
-            statusDiv.style.display = 'block';
+        function showError() {
+            document.getElementById('debugPanel').style.display = 'block';
+            document.getElementById('errorInstructions').style.display = 'block';
         }
 
-        function showDetailedInstructions() {
-            const instructionsDiv = document.createElement('div');
-            instructionsDiv.className = 'detailed-instructions';
-            instructionsDiv.innerHTML = `
-                <h4>📋 Step-by-Step Instructions:</h4>
-                <ol>
-                    <li><strong>Go to "Content Types"</strong> in your Contentstack stack</li>
-                    <li><strong>Click on any content type</strong> (like "Article", "Blog Post", etc.)</li>
-                    <li><strong>Open an existing entry</strong> OR create a new entry</li>
-                    <li><strong>Look for "Smart Find Replace" in the RIGHT SIDEBAR</strong></li>
-                    <li>If you don't see it in the sidebar, check your app installation</li>
-                </ol>
-                <div class="warning">
-                    <strong>⚠️ Important:</strong> This app only works when you're editing an entry, not on the main dashboard or content type list.
-                </div>
-                <div class="troubleshooting">
-                    <h4>🔧 Still not working?</h4>
-                    <ul>
-                        <li>Make sure your app is installed in the stack</li>
-                        <li>Check if the app appears in Apps → Installed Apps</li>
-                        <li>Try refreshing the entry page</li>
-                        <li>Contact support if the issue persists</li>
-                    </ul>
-                </div>
-            `;
-            document.getElementById('appStatus').appendChild(instructionsDiv);
-        }
-
-        // Your existing functions (getSuggestion, performReplace, etc.)
         async function getSuggestion() {
             const findText = document.getElementById('findText').value.trim();
             
@@ -228,7 +185,9 @@
                 return;
             }
 
-            setButtonLoading('suggestBtn', true);
+            const btn = document.getElementById('suggestBtn');
+            btn.disabled = true;
+            btn.textContent = 'Getting suggestion...';
 
             try {
                 showStatus('🤖 Getting AI suggestion...', 'info');
@@ -247,12 +206,20 @@
                     if (data.suggestion) {
                         document.getElementById('replaceText').value = data.suggestion;
                         showStatus('✨ AI suggestion applied!', 'success');
+                    } else {
+                        showStatus('❌ No suggestion available', 'error');
                     }
+                } else {
+                    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                    showStatus(`❌ ${errorData.error || 'Failed to get suggestion'}`, 'error');
                 }
+
             } catch (error) {
-                showStatus('❌ Failed to get suggestion', 'error');
+                console.error('Suggestion error:', error);
+                showStatus('❌ Failed to connect to AI service', 'error');
             } finally {
-                setButtonLoading('suggestBtn', false);
+                btn.disabled = false;
+                btn.textContent = '✨ Get AI Suggestion';
             }
         }
 
@@ -270,7 +237,9 @@
                 return;
             }
 
-            setButtonLoading('replaceBtn', true);
+            const btn = document.getElementById('replaceBtn');
+            btn.disabled = true;
+            btn.textContent = 'Replacing...';
 
             try {
                 showStatus('🔄 Performing replacement...', 'info');
@@ -289,20 +258,18 @@
                     showStatus('✅ Entry updated successfully!', 'success');
                     document.getElementById('findText').value = '';
                     document.getElementById('replaceText').value = '';
+                } else {
+                    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                    showStatus(`❌ ${errorData.error || 'Failed to update entry'}`, 'error');
                 }
-            } catch (error) {
-                showStatus('❌ Failed to update entry', 'error');
-            } finally {
-                setButtonLoading('replaceBtn', false);
-            }
-        }
 
-        function setButtonLoading(buttonId, isLoading) {
-            const button = document.getElementById(buttonId);
-            button.disabled = isLoading;
-            button.textContent = isLoading ? 
-                (buttonId === 'suggestBtn' ? 'Getting suggestion...' : 'Replacing...') : 
-                (buttonId === 'suggestBtn' ? '✨ Get AI Suggestion' : '🔄 Replace');
+            } catch (error) {
+                console.error('Replace error:', error);
+                showStatus('❌ Failed to connect to update service', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔄 Replace';
+            }
         }
 
         function showStatus(message, type) {
