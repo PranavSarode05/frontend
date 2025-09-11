@@ -10,19 +10,18 @@
     <div class="container">
         <div class="header">
             <h1>🔍 Smart Find & Replace</h1>
-            <p>AI-powered find and replace for Contentstack entries</p>
+            <p>AI-powered content replacement</p>
         </div>
         
-        <div class="debug-panel" id="debugPanel">
-            <h4>🔧 Debug Information</h4>
-            <div id="debugOutput">Initializing...</div>
-            <button onclick="toggleDebug()" class="debug-toggle">Hide Debug</button>
+        <div id="sdkStatus" class="sdk-status">
+            <div>🔄 Loading Contentstack SDK...</div>
         </div>
         
-        <div id="appContent" style="display: none;">
+        <div id="mainApp" style="display: none;">
+            <!-- Your app content here -->
             <div class="form-group">
                 <label for="findText">Find Text:</label>
-                <input type="text" id="findText" placeholder="Enter text to find in this entry">
+                <input type="text" id="findText" placeholder="Enter text to find">
             </div>
             
             <div class="form-group">
@@ -31,172 +30,154 @@
             </div>
             
             <div class="btn-group">
-                <button class="btn-secondary" id="suggestBtn" onclick="getSuggestion()">✨ Get AI Suggestion</button>
-                <button class="btn-primary" id="replaceBtn" onclick="performReplace()">🔄 Replace</button>
+                <button class="btn-secondary" onclick="getSuggestion()">✨ AI Suggestion</button>
+                <button class="btn-primary" onclick="performReplace()">🔄 Replace</button>
             </div>
             
             <div id="status"></div>
             <div class="entry-info">
-                <small>Working with entry: <span id="entryUID">Loading...</span></small>
-            </div>
-        </div>
-
-        <div class="error-instructions" id="errorInstructions" style="display: none;">
-            <h3>❌ App Not in Entry Context</h3>
-            <div class="step-by-step">
-                <h4>Follow these exact steps:</h4>
-                <ol>
-                    <li>Go to <strong>"Content Types"</strong> in your Contentstack navigation</li>
-                    <li>Click on any content type (Article, Blog, etc.)</li>
-                    <li><strong>Open an existing entry</strong> or create new entry</li>
-                    <li>Look for <strong>"Smart Find Replace"</strong> in the RIGHT sidebar</li>
-                    <li>If not visible, check your app installation</li>
-                </ol>
-            </div>
-            <div class="warning-box">
-                <strong>⚠️ Important:</strong> This app ONLY works inside entry editing pages, not on dashboards or listing pages.
+                <small>Entry: <code id="entryUID">Loading...</code></small>
             </div>
         </div>
     </div>
 
-    <script src="https://unpkg.com/@contentstack/app-sdk/dist/index.js"></script>
+    <!-- Enhanced SDK Loading with Multiple Fallbacks -->
     <script>
-        const API_URL = 'https://backend-f4ee.vercel.app';
-        let appSdk = null;
-        let currentEntry = null;
-        let entryUID = null;
-
-        function debugLog(message) {
-            console.log(message);
-            document.getElementById('debugOutput').innerHTML += `<div>${message}</div>`;
+        // Method 1: Try loading from unpkg CDN
+        function loadSDK() {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://unpkg.com/@contentstack/app-sdk@latest/dist/index.js';
+                script.onload = () => {
+                    console.log('✅ SDK loaded from unpkg');
+                    resolve();
+                };
+                script.onerror = () => {
+                    console.warn('❌ Failed to load from unpkg, trying alternative...');
+                    loadSDKAlternative().then(resolve).catch(reject);
+                };
+                document.head.appendChild(script);
+            });
         }
 
-        function toggleDebug() {
-            const panel = document.getElementById('debugPanel');
-            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        // Method 2: Alternative CDN source
+        function loadSDKAlternative() {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/@contentstack/app-sdk@latest/dist/index.js';
+                script.onload = () => {
+                    console.log('✅ SDK loaded from jsDelivr');
+                    resolve();
+                };
+                script.onerror = () => {
+                    console.error('❌ Failed to load SDK from all sources');
+                    reject(new Error('SDK loading failed'));
+                };
+                document.head.appendChild(script);
+            });
         }
 
-        // Enhanced initialization with comprehensive debugging
-        window.onload = async function() {
-            debugLog('🚀 Starting app initialization...');
-            
+        // Method 3: Check if SDK is available and initialize
+        async function initializeApp() {
             try {
-                // Check SDK availability
+                // Wait for SDK to load
+                await loadSDK();
+                
+                // Verify SDK is available
                 if (typeof ContentstackAppSDK === 'undefined') {
-                    throw new Error('ContentstackAppSDK not available');
+                    throw new Error('ContentstackAppSDK not available after loading');
                 }
-                debugLog('✅ ContentstackAppSDK available');
-
-                // Initialize SDK
-                appSdk = await ContentstackAppSDK.init();
-                debugLog('✅ SDK initialized successfully');
                 
-                // Debug location object
-                debugLog(`📍 Location object: ${JSON.stringify(Object.keys(appSdk.location || {}))}`);
+                document.getElementById('sdkStatus').innerHTML = '<div class="success">✅ SDK loaded successfully</div>';
                 
-                if (!appSdk.location) {
-                    throw new Error('No location object - app not in proper context');
-                }
-
-                // Method 1: Try ContentTypeField.entry
-                let entryFound = false;
-                try {
-                    if (appSdk.location.ContentTypeField && appSdk.location.ContentTypeField.entry) {
-                        debugLog('🎯 Attempting ContentTypeField.entry.getData()');
-                        currentEntry = await appSdk.location.ContentTypeField.entry.getData();
-                        if (currentEntry && currentEntry.uid) {
-                            entryUID = currentEntry.uid;
-                            entryFound = true;
-                            debugLog(`✅ Entry found via ContentTypeField: ${entryUID}`);
-                        }
-                    }
-                } catch (e) {
-                    debugLog(`❌ ContentTypeField method failed: ${e.message}`);
-                }
-
-                // Method 2: Try RTE.entry (fallback)
-                if (!entryFound) {
+                // Wait a bit more for SDK to initialize
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Initialize the SDK
+                const appSdk = await ContentstackAppSDK.init();
+                console.log('✅ App SDK initialized');
+                
+                // Try to get entry data
+                let entryData = null;
+                let entryUID = null;
+                
+                // Multiple detection strategies
+                const strategies = [
+                    () => appSdk.location.ContentTypeField?.entry?.getData(),
+                    () => appSdk.location.RTE?.entry?.getData(),
+                    () => appSdk.location.CustomField?.entry?.getData(),
+                    () => appSdk.location.SidebarWidget?.entry?.getData()
+                ];
+                
+                for (const strategy of strategies) {
                     try {
-                        if (appSdk.location.RTE && appSdk.location.RTE.entry) {
-                            debugLog('🎯 Attempting RTE.entry.getData()');
-                            currentEntry = await appSdk.location.RTE.entry.getData();
-                            if (currentEntry && currentEntry.uid) {
-                                entryUID = currentEntry.uid;
-                                entryFound = true;
-                                debugLog(`✅ Entry found via RTE: ${entryUID}`);
-                            }
+                        const data = await strategy();
+                        if (data?.uid) {
+                            entryData = data;
+                            entryUID = data.uid;
+                            console.log(`✅ Entry detected: ${entryUID}`);
+                            break;
                         }
                     } catch (e) {
-                        debugLog(`❌ RTE method failed: ${e.message}`);
+                        continue;
                     }
                 }
-
-                // Method 3: Try CustomField.entry (fallback)
-                if (!entryFound) {
-                    try {
-                        if (appSdk.location.CustomField && appSdk.location.CustomField.entry) {
-                            debugLog('🎯 Attempting CustomField.entry.getData()');
-                            currentEntry = await appSdk.location.CustomField.entry.getData();
-                            if (currentEntry && currentEntry.uid) {
-                                entryUID = currentEntry.uid;
-                                entryFound = true;
-                                debugLog(`✅ Entry found via CustomField: ${entryUID}`);
-                            }
-                        }
-                    } catch (e) {
-                        debugLog(`❌ CustomField method failed: ${e.message}`);
-                    }
-                }
-
-                if (entryFound) {
-                    debugLog(`🎉 Successfully found entry: ${entryUID}`);
-                    enableApp();
+                
+                if (entryUID) {
+                    // Success! Show the main app
+                    document.getElementById('sdkStatus').style.display = 'none';
+                    document.getElementById('mainApp').style.display = 'block';
+                    document.getElementById('entryUID').textContent = entryUID;
+                    
+                    // Store globally for other functions
+                    window.currentEntryUID = entryUID;
+                    window.currentEntryData = entryData;
+                    
                 } else {
-                    throw new Error('No entry UID found with any method');
+                    throw new Error('No entry context detected');
                 }
-
+                
             } catch (error) {
-                debugLog(`💥 Initialization failed: ${error.message}`);
-                showError();
+                console.error('App initialization failed:', error);
+                document.getElementById('sdkStatus').innerHTML = `
+                    <div class="error">
+                        <h3>❌ App Initialization Failed</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <div class="troubleshooting">
+                            <h4>Troubleshooting:</h4>
+                            <ul>
+                                <li>Ensure you're accessing this app from within a Contentstack entry editor</li>
+                                <li>Check your internet connection</li>
+                                <li>Try refreshing the page</li>
+                                <li>Clear browser cache or try incognito mode</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
             }
-        };
-
-        function enableApp() {
-            document.getElementById('debugPanel').style.display = 'none';
-            document.getElementById('appContent').style.display = 'block';
-            document.getElementById('entryUID').textContent = entryUID;
         }
 
-        function showError() {
-            document.getElementById('debugPanel').style.display = 'block';
-            document.getElementById('errorInstructions').style.display = 'block';
-        }
-
+        // API Functions
         async function getSuggestion() {
+            if (!window.currentEntryUID) {
+                showStatus('❌ No entry context', 'error');
+                return;
+            }
+
             const findText = document.getElementById('findText').value.trim();
-            
             if (!findText) {
                 showStatus('❌ Please enter text to find', 'error');
                 return;
             }
 
-            if (!entryUID) {
-                showStatus('❌ No entry context available', 'error');
-                return;
-            }
-
-            const btn = document.getElementById('suggestBtn');
-            btn.disabled = true;
-            btn.textContent = 'Getting suggestion...';
-
             try {
                 showStatus('🤖 Getting AI suggestion...', 'info');
                 
-                const response = await fetch(`${API_URL}/suggest`, {
+                const response = await fetch('https://backend-f4ee.vercel.app/suggest', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        uid: entryUID,
+                        uid: window.currentEntryUID,
                         findText: findText
                     })
                 });
@@ -206,24 +187,19 @@
                     if (data.suggestion) {
                         document.getElementById('replaceText').value = data.suggestion;
                         showStatus('✨ AI suggestion applied!', 'success');
-                    } else {
-                        showStatus('❌ No suggestion available', 'error');
                     }
-                } else {
-                    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-                    showStatus(`❌ ${errorData.error || 'Failed to get suggestion'}`, 'error');
                 }
-
             } catch (error) {
-                console.error('Suggestion error:', error);
-                showStatus('❌ Failed to connect to AI service', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = '✨ Get AI Suggestion';
+                showStatus('❌ Failed to get suggestion', 'error');
             }
         }
 
         async function performReplace() {
+            if (!window.currentEntryUID) {
+                showStatus('❌ No entry context', 'error');
+                return;
+            }
+
             const findText = document.getElementById('findText').value.trim();
             const replaceText = document.getElementById('replaceText').value.trim();
             
@@ -232,23 +208,14 @@
                 return;
             }
 
-            if (!entryUID) {
-                showStatus('❌ No entry context available', 'error');
-                return;
-            }
-
-            const btn = document.getElementById('replaceBtn');
-            btn.disabled = true;
-            btn.textContent = 'Replacing...';
-
             try {
                 showStatus('🔄 Performing replacement...', 'info');
                 
-                const response = await fetch(`${API_URL}/replace`, {
+                const response = await fetch('https://backend-f4ee.vercel.app/replace', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        uid: entryUID,
+                        uid: window.currentEntryUID,
                         findText: findText,
                         replaceText: replaceText
                     })
@@ -258,17 +225,9 @@
                     showStatus('✅ Entry updated successfully!', 'success');
                     document.getElementById('findText').value = '';
                     document.getElementById('replaceText').value = '';
-                } else {
-                    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-                    showStatus(`❌ ${errorData.error || 'Failed to update entry'}`, 'error');
                 }
-
             } catch (error) {
-                console.error('Replace error:', error);
-                showStatus('❌ Failed to connect to update service', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = '🔄 Replace';
+                showStatus('❌ Failed to update entry', 'error');
             }
         }
 
@@ -280,6 +239,9 @@
                 setTimeout(() => statusDiv.innerHTML = '', 4000);
             }
         }
+
+        // Start the app when page loads
+        window.onload = initializeApp;
     </script>
 </body>
 </html>

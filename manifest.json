@@ -1,17 +1,21 @@
 {
-  "name": "Smart Find Replace",
-  "version": "1.1.1",
-  "target": { "type": "stack" },
+  "name": "Smart Find & Replace",
+  "version": "1.4.0",
+  "description": "AI-powered find and replace tool with intelligent suggestions for Contentstack entries",
+  "target": {
+    "type": "stack"
+  },
   "ui_location": {
     "locations": [
       {
         "type": "cs.cm.entry.sidebar",
         "meta": [
           {
-            "name": "Smart Find Replace",
+            "name": "Smart Find & Replace",
             "path": "/",
             "signed": false,
-            "enabled": true
+            "enabled": true,
+            "required": false
           }
         ]
       }
@@ -21,6 +25,35 @@
     "content_types": ["*"],
     "branches": ["*"],
     "environments": ["*"]
+  },
+  "config": {
+    "backend_url": {
+      "type": "text",
+      "display_name": "Backend API URL",
+      "instruction": "Your backend API endpoint",
+      "default": "https://backend-f4ee.vercel.app"
+    }
+  },
+  "content_security_policy": {
+    "connect-src": [
+      "'self'",
+      "*.contentstack.com",
+      "*.contentstack.io",
+      "https://unpkg.com",
+      "https://cdn.jsdelivr.net",
+      "https://backend-f4ee.vercel.app"
+    ],
+    "script-src": [
+      "'self'",
+      "'unsafe-inline'",
+      "*.contentstack.com",
+      "https://unpkg.com",
+      "https://cdn.jsdelivr.net"
+    ],
+    "style-src": [
+      "'self'",
+      "'unsafe-inline'"
+    ]
   },
   "hosting": {
     "type": "hosted",
