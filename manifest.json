@@ -1,8 +1,7 @@
 {
   "name": "Smart Find/Replace",
-  "description": "Context-aware content replacement with AI suggestions",
-  "version": "3.0.2",
-  
+  "description": "Context-aware content replacement with AI suggestions for Contentstack entries",
+  "version": "3.0.3",
   "icon": "",
   "target": {
     "type": "stack"
@@ -32,19 +31,22 @@
     "backend_url": {
       "type": "text",
       "display_name": "Backend API URL",
-      "instruction": "Enter your backend API URL",
+      "instruction": "Enter your backend API URL (leave default for production)",
       "default": "https://backend-f4ee.vercel.app"
     },
     "openai_api_key": {
       "type": "text",
       "display_name": "OpenAI API Key",
-      "instruction": "Enter your OpenAI API key for AI suggestions"
+      "instruction": "Enter your OpenAI API key for AI suggestions (optional)"
     },
     "brandkit_id": {
       "type": "text", 
       "display_name": "Brandkit ID",
-      "instruction": "Enter your Contentstack Brandkit ID"
+      "instruction": "Enter your Contentstack Brandkit ID (optional)"
     }
+  },
+  "webhook": {
+    "enabled": false
   },
   "content_security_policy": {
     "script-src": [
