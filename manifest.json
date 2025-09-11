@@ -1,7 +1,7 @@
 {
   "name": "Smart Find Replace",
-  "description": "AI-powered find and replace tool for Contentstack entries with intelligent suggestions",
-  "version": "1.0.1",
+  "description": "AI-powered find and replace tool for Contentstack entries",
+  "version": "1.0.2",
   "target": {
     "type": "stack"
   },
@@ -14,8 +14,7 @@
             "name": "Smart Find Replace",
             "path": "/",
             "signed": false,
-            "enabled": true,
-            "required": false
+            "enabled": true
           }
         ]
       }
@@ -26,19 +25,11 @@
     "branches": ["*"],
     "environments": ["*"]
   },
-  "config": {
-    "backend_url": {
-      "type": "text",
-      "display_name": "Backend API URL",
-      "instruction": "Enter your backend API URL (leave default for production)",
-      "default": "https://backend-f4ee.vercel.app"
-    }
-  },
   "content_security_policy": {
     "connect-src": [
       "'self'",
       "*.contentstack.com",
-      "*.contentstack.io",
+      "*.contentstack.io", 
       "https://unpkg.com",
       "https://backend-f4ee.vercel.app"
     ],
