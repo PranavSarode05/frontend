@@ -7,18 +7,11 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
     rollupOptions: {
-      input: 'index.html',
-      output: {
-        assetFileNames: 'assets/[name].[hash].[ext]'
+      input: {
+        main: 'marketplace-app.html'
       }
     }
   },
   base: './',
-  css: {
-    preprocessorOptions: {
-      css: {
-        charset: false
-      }
-    }
-  }
+  assetsInclude: ['**/*.css']
 })
