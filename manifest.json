@@ -12,7 +12,7 @@
         "type": "cs.cm.stack.full_page",
         "meta": [
           {
-            "name": "Smart Find/Replace",
+            "name": "test",
             "path": "/",
             "signed": false,
             "enabled": true,
