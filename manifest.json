@@ -1,18 +1,17 @@
 {
-  "name": "Smart Find/Replace",
-  "description": "Context-aware content replacement with AI suggestions for Contentstack entries",
-  "version": "3.0.3",
-  "icon": "",
+  "name": "Smart Find Replace",
+  "description": "AI-powered find and replace tool for Contentstack entries with intelligent suggestions",
+  "version": "1.0.1",
   "target": {
     "type": "stack"
   },
   "ui_location": {
     "locations": [
       {
-        "type": "cs.cm.stack.full_page",
+        "type": "cs.cm.entry.sidebar",
         "meta": [
           {
-            "name": "test",
+            "name": "Smart Find Replace",
             "path": "/",
             "signed": false,
             "enabled": true,
@@ -33,92 +32,25 @@
       "display_name": "Backend API URL",
       "instruction": "Enter your backend API URL (leave default for production)",
       "default": "https://backend-f4ee.vercel.app"
-    },
-    "openai_api_key": {
-      "type": "text",
-      "display_name": "OpenAI API Key",
-      "instruction": "Enter your OpenAI API key for AI suggestions (optional)"
-    },
-    "brandkit_id": {
-      "type": "text", 
-      "display_name": "Brandkit ID",
-      "instruction": "Enter your Contentstack Brandkit ID (optional)"
     }
   },
-  "webhook": {
-    "enabled": false
-  },
   "content_security_policy": {
+    "connect-src": [
+      "'self'",
+      "*.contentstack.com",
+      "*.contentstack.io",
+      "https://unpkg.com",
+      "https://backend-f4ee.vercel.app"
+    ],
     "script-src": [
       "'self'",
       "'unsafe-inline'",
-      "'unsafe-eval'",
-      "*.csnonprod.com",
       "*.contentstack.com",
-      "*.contentstack.io",
-      "*.google-analytics.com",
-      "*.salesforce-sites.com",
-      "*.force.com",
-      "*.jquery.com",
-      "*.salesforceliveagent.com",
-      "*.salesforce.com",
-      "*.cdn.apollographql.com",
-      "https://code.jquery.com",
-      "*.bootstrapcdn.com",
-      "https://cdnjs.cloudflare.com",
-      "https://cdn.heapanalytics.com",
-      "https://fast.appcues.com",
-      "https://fast.appcues.net",
-      "https://googletagmanager.com",
-      "https://js.intercomcdn.com",
-      "https://service.force.com",
-      "https://tagmanager.google.com",
-      "https://www.googletagmanager.com",
-      "https://widget.intercom.io",
-      "https://widget.usersnap.com",
-      "https://resources.usersnap.com",
-      "https://stats.pusher.com",
-      "https://api.commandbar.com",
-      "https://unpkg.com",
-      "https://frames-commandbar-prod.commandbar.com",
-      "https://cdn.commandbar.com",
-      "https://t.contentsquare.net"
-    ],
-    "connect-src": [
-      "'self'",
-      "*.csnonprod.com",
-      "*.contentstack.com",
-      "*.contentstack.io",
-      "*.salesforce-sites.com",
-      "*.force.com",
-      "*.jquery.com",
-      "*.salesforceliveagent.com",
-      "*.salesforce.com",
-      "*.cdn.apollographql.com",
-      "https://code.jquery.com",
-      "*.bootstrapcdn.com",
-      "https://cdnjs.cloudflare.com",
-      "https://cdn.heapanalytics.com",
-      "https://fast.appcues.com",
-      "https://fast.appcues.net",
-      "https://googletagmanager.com",
-      "https://js.intercomcdn.com",
-      "https://service.force.com",
-      "https://tagmanager.google.com",
-      "https://www.googletagmanager.com",
-      "https://widget.intercom.io",
-      "https://widget.usersnap.com",
-      "https://resources.usersnap.com",
-      "https://stats.pusher.com",
-      "https://api.commandbar.com",
-      "https://unpkg.com",
-      "https://frames-commandbar-prod.commandbar.com",
-      "https://cdn.commandbar.com",
-      "https://t.contentsquare.net",
-      "https://backend-f4ee.vercel.app",
-      "https://generativelanguage.googleapis.com",
-      "https://eu-ai.contentstack.com"
+      "https://unpkg.com"
     ]
   },
-  "src": "marketplace-app.html"
+  "hosting": {
+    "type": "hosted",
+    "url": "https://frontend-app.eu-contentstackapps.com/"
+  }
 }
