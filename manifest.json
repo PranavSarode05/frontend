@@ -1,10 +1,7 @@
 {
   "name": "Smart Find Replace",
-  "description": "AI-powered find and replace tool for Contentstack entries",
-  "version": "1.1.0",
-  "target": {
-    "type": "stack"
-  },
+  "version": "1.1.1",
+  "target": { "type": "stack" },
   "ui_location": {
     "locations": [
       {
@@ -24,21 +21,6 @@
     "content_types": ["*"],
     "branches": ["*"],
     "environments": ["*"]
-  },
-  "content_security_policy": {
-    "connect-src": [
-      "'self'",
-      "*.contentstack.com",
-      "*.contentstack.io", 
-      "https://unpkg.com",
-      "https://backend-f4ee.vercel.app"
-    ],
-    "script-src": [
-      "'self'",
-      "'unsafe-inline'",
-      "*.contentstack.com",
-      "https://unpkg.com"
-    ]
   },
   "hosting": {
     "type": "hosted",
