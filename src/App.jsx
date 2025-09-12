@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import axios from "axios";
+import './assets/styles.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://backend-f4ee.vercel.app/';
 
