@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Find & Replace</title>
-    <link rel="stylesheet" href="/assets/styles-BskazeXO.css">
+    <link rel="stylesheet" href="/assets/styles-BskazeXO.css?v=5">
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>🔍 Smart Find & Replace</h1>
-            <p>AI-powered content replacement</p>
+            <p>AI-powered content replacement with confidence scoring</p>
         </div>
         
         <div id="sdkStatus" class="sdk-status">
@@ -27,6 +27,20 @@
             <div class="form-group">
                 <label for="replaceText">Replace With:</label>
                 <input type="text" id="replaceText" placeholder="Enter replacement text">
+                
+                <!-- ✨ NEW: Confidence display area -->
+                <div id="confidenceArea" style="display: none; margin-top: 12px;">
+                    <div class="confidence-indicator">
+                        <div class="confidence-header">
+                            <span class="confidence-label">AI Confidence:</span>
+                            <span class="confidence-percentage" id="confidenceScore">0%</span>
+                        </div>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="confidenceFill" style="width: 0%;"></div>
+                        </div>
+                        <div class="confidence-message" id="confidenceMessage"></div>
+                    </div>
+                </div>
             </div>
             
             <div class="btn-group">
@@ -157,7 +171,40 @@
             }
         }
 
-        // API Functions
+        // ✨ NEW: Function to display AI confidence score
+        function showConfidenceScore(confidence) {
+            const confidenceArea = document.getElementById('confidenceArea');
+            const confidenceScore = document.getElementById('confidenceScore');
+            const confidenceFill = document.getElementById('confidenceFill');
+            const confidenceMessage = document.getElementById('confidenceMessage');
+            
+            // Show the confidence area
+            confidenceArea.style.display = 'block';
+            
+            // Update score and progress bar
+            confidenceScore.textContent = `${confidence}%`;
+            confidenceFill.style.width = `${confidence}%`;
+            
+            // Update confidence message based on score
+            let message = '';
+            let messageClass = '';
+            
+            if (confidence >= 85) {
+                message = 'High confidence - AI is very sure about this suggestion';
+                messageClass = 'confidence-high';
+            } else if (confidence >= 65) {
+                message = 'Medium confidence - Review suggested replacement';
+                messageClass = 'confidence-medium';
+            } else {
+                message = 'Low confidence - Carefully review before using';
+                messageClass = 'confidence-low';
+            }
+            
+            confidenceMessage.textContent = message;
+            confidenceMessage.className = `confidence-message ${messageClass}`;
+        }
+
+        // ✨ UPDATED: Enhanced getSuggestion with confidence display
         async function getSuggestion() {
             if (!window.currentEntryUID) {
                 showStatus('❌ No entry context', 'error');
@@ -169,6 +216,9 @@
                 showStatus('❌ Please enter text to find', 'error');
                 return;
             }
+
+            // Hide confidence area when getting new suggestion
+            document.getElementById('confidenceArea').style.display = 'none';
 
             try {
                 showStatus('🤖 Getting AI suggestion...', 'info');
@@ -187,10 +237,18 @@
                     if (data.suggestion) {
                         document.getElementById('replaceText').value = data.suggestion;
                         showStatus('✨ AI suggestion applied!', 'success');
+                        
+                        // ✨ NEW: Display confidence score
+                        if (data.confidence !== undefined) {
+                            showConfidenceScore(data.confidence);
+                        }
                     }
+                } else {
+                    showStatus('❌ Failed to get suggestion', 'error');
                 }
             } catch (error) {
                 showStatus('❌ Failed to get suggestion', 'error');
+                console.error('Suggestion error:', error);
             }
         }
 
@@ -225,9 +283,15 @@
                     showStatus('✅ Entry updated successfully!', 'success');
                     document.getElementById('findText').value = '';
                     document.getElementById('replaceText').value = '';
+                    
+                    // Hide confidence area after successful replacement
+                    document.getElementById('confidenceArea').style.display = 'none';
+                } else {
+                    showStatus('❌ Failed to update entry', 'error');
                 }
             } catch (error) {
                 showStatus('❌ Failed to update entry', 'error');
+                console.error('Replace error:', error);
             }
         }
 

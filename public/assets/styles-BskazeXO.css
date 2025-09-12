@@ -1,4 +1,4 @@
-/* === Complete styles.css for Smart Find & Replace === */
+/* === Complete styles.css for Smart Find & Replace with AI Confidence Scoring === */
 
 body {
     background-color: #0f172a;
@@ -299,6 +299,19 @@ button.loading::after {
     button {
         padding: 14px 20px;
     }
+    
+    /* ✨ Mobile adjustments for confidence indicator */
+    .confidence-indicator {
+        font-size: 12px;
+    }
+    
+    .confidence-bar {
+        height: 8px;
+    }
+    
+    .confidence-fill {
+        height: 8px;
+    }
 }
 
 /* Focus States */
@@ -310,6 +323,89 @@ button:focus-visible {
 input:focus-visible {
     outline: 2px solid #6366f1;
     outline-offset: 2px;
+}
+
+/* ✨ NEW: AI Confidence Scoring Styles */
+.confidence-indicator {
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 8px;
+    border: 1px solid #334155;
+}
+
+.confidence-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #cbd5e1;
+}
+
+.confidence-label {
+    color: #94a3b8;
+}
+
+.confidence-percentage {
+    color: #6366f1;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.confidence-bar {
+    height: 6px;
+    background-color: #1e293b;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    border: 1px solid #475569;
+}
+
+.confidence-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #22c55e 100%);
+    transition: width 0.5s ease;
+    border-radius: 2px;
+}
+
+.confidence-message {
+    font-size: 12px;
+    text-align: center;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.confidence-high {
+    color: #22c55e !important;
+    font-weight: 600;
+}
+
+.confidence-medium {
+    color: #f59e0b !important;
+    font-weight: 600;
+}
+
+.confidence-low {
+    color: #ef4444 !important;
+    font-weight: 600;
+}
+
+/* ✨ Confidence indicator animation */
+@keyframes confidenceFade {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#confidenceArea {
+    animation: confidenceFade 0.3s ease-in-out;
 }
 
 /* End of styles.css */
