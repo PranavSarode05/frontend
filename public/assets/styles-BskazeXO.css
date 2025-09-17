@@ -1,5 +1,3 @@
-/* === Complete styles.css for Smart Find & Replace with AI Confidence Scoring (Light Theme) === */
-
 body {
     background-color: #f8fafc;
     color: #1e293b;
@@ -44,6 +42,47 @@ body {
     text-align: center;
 }
 
+/* ✨ NEW: Mode Toggle Styles */
+.mode-toggle {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 32px;
+    background-color: #f1f5f9;
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+}
+
+.mode-btn {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 6px;
+    background-color: transparent;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.mode-btn:hover:not(.active) {
+    background-color: #e2e8f0;
+    color: #475569;
+}
+
+.mode-btn.active {
+    background-color: #6366f1;
+    color: white;
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+}
+
+/* ✨ NEW: Replacement Mode Containers */
+.replacement-mode {
+    text-align: left;
+}
+
 .form-group {
     margin-bottom: 32px;
     text-align: left;
@@ -81,6 +120,184 @@ input[type='text']::placeholder {
     font-style: italic;
 }
 
+/* ✨ NEW: Smart Prompt Styles */
+textarea#smartPrompt {
+    width: 100%;
+    min-height: 80px;
+    padding: 12px 16px;
+    background-color: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    color: #1e293b;
+    font-size: 14px;
+    font-family: inherit;
+    box-sizing: border-box;
+    resize: vertical;
+    transition: all 0.2s ease;
+    line-height: 1.5;
+}
+
+textarea#smartPrompt:focus {
+    outline: none;
+    border-color: #6366f1;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+textarea#smartPrompt::placeholder {
+    color: #94a3b8;
+    font-style: italic;
+}
+
+/* ✨ NEW: Prompt Examples */
+.prompt-examples {
+    margin-top: 16px;
+}
+
+.prompt-examples small {
+    display: block;
+    font-weight: 600;
+    color: #6366f1;
+    margin-bottom: 8px;
+    font-size: 12px;
+}
+
+.example-prompt {
+    display: block;
+    padding: 10px 12px;
+    background-color: #eef2ff;
+    border: 1px solid #c7d2fe;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #4338ca;
+    transition: all 0.2s ease;
+    line-height: 1.4;
+}
+
+.example-prompt:hover {
+    background-color: #ddd6fe;
+    border-color: #a78bfa;
+    color: #5b21b6;
+    transform: translateY(-1px);
+}
+
+.example-prompt:last-child {
+    margin-bottom: 0;
+}
+
+/* ✨ NEW: Smart Results */
+.smart-operations {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 24px 0;
+    text-align: left;
+}
+
+.smart-operations h4 {
+    color: #1e293b;
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ✨ NEW: Operation Cards */
+.operation-card {
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.operation-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+}
+
+.operation-card:last-child {
+    margin-bottom: 0;
+}
+
+.operation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.operation-type {
+    font-weight: 600;
+    font-size: 13px;
+    color: #374151;
+}
+
+.confidence-badge {
+    background-color: #6366f1;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.operation-details {
+    font-size: 14px;
+    color: #4b5563;
+    margin-bottom: 8px;
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+    background-color: #f9fafb;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #f3f4f6;
+}
+
+.brand-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.brand-indicator.brand-compliant {
+    color: #059669;
+}
+
+.brand-indicator.brand-warning {
+    color: #d97706;
+}
+
+/* ✨ NEW: Brand Status */
+.brand-status {
+    margin: 16px 0;
+    padding: 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 13px;
+    text-align: center;
+}
+
+.brand-success {
+    background-color: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.brand-warning {
+    background-color: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
 .btn-group {
     display: flex;
     gap: 16px;
@@ -97,6 +314,7 @@ button {
     cursor: pointer;
     transition: all 0.2s ease;
     font-size: 14px;
+    position: relative;
 }
 
 .btn-primary {
@@ -276,55 +494,7 @@ button.loading::after {
     100% { transform: rotate(360deg); }
 }
 
-/* Responsive Design */
-@media (max-width: 600px) {
-    body {
-        padding: 16px;
-    }
-    
-    .container {
-        padding: 32px 24px;
-        max-width: none;
-    }
-    
-    .btn-group {
-        flex-direction: column;
-        gap: 12px;
-    }
-    
-    .header h1 {
-        font-size: 24px;
-    }
-    
-    button {
-        padding: 14px 20px;
-    }
-    
-    .confidence-indicator {
-        font-size: 12px;
-    }
-    
-    .confidence-bar {
-        height: 8px;
-    }
-    
-    .confidence-fill {
-        height: 8px;
-    }
-}
-
-/* Focus States */
-button:focus-visible {
-    outline: 2px solid #6366f1;
-    outline-offset: 2px;
-}
-
-input:focus-visible {
-    outline: 2px solid #6366f1;
-    outline-offset: 2px;
-}
-
-/* ✨ NEW: AI Confidence Scoring Styles */
+/* ✨ AI Confidence Scoring Styles */
 .confidence-indicator {
     margin-top: 12px;
     padding: 12px;
@@ -405,6 +575,150 @@ input:focus-visible {
 
 #confidenceArea {
     animation: confidenceFade 0.3s ease-in-out;
+}
+
+/* ✨ NEW: Smart Results Animation */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#smartResults {
+    animation: slideIn 0.3s ease-in-out;
+}
+
+/* ✨ NEW: Operation Card Hover Effects */
+.operation-card {
+    transition: all 0.2s ease;
+}
+
+.operation-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    body {
+        padding: 16px;
+    }
+    
+    .container {
+        padding: 32px 24px;
+        max-width: none;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .header h1 {
+        font-size: 24px;
+    }
+    
+    button {
+        padding: 14px 20px;
+    }
+    
+    .confidence-indicator {
+        font-size: 12px;
+    }
+    
+    .confidence-bar {
+        height: 8px;
+    }
+    
+    .confidence-fill {
+        height: 8px;
+    }
+
+    /* ✨ NEW: Mobile Smart Prompt Styles */
+    .mode-toggle {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .mode-btn {
+        padding: 14px 16px;
+    }
+    
+    textarea#smartPrompt {
+        min-height: 100px;
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    .operation-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .confidence-badge {
+        align-self: flex-end;
+    }
+    
+    .smart-operations {
+        padding: 16px;
+    }
+    
+    .operation-card {
+        padding: 12px;
+    }
+}
+
+/* Focus States */
+button:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+}
+
+input:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+}
+
+textarea:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+}
+
+/* ✨ NEW: Dark Mode Support (Optional) */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #0f172a;
+        color: #e2e8f0;
+    }
+    
+    .container {
+        background-color: #1e293b;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .header h1 {
+        color: #e2e8f0;
+    }
+    
+    .mode-toggle {
+        background-color: #334155;
+    }
+    
+    .operation-card {
+        background-color: #334155;
+        border-color: #475569;
+        color: #e2e8f0;
+    }
+    
+    .smart-operations {
+        background-color: #334155;
+        border-color: #475569;
+    }
 }
 
 /* End of styles.css */
