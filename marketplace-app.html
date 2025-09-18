@@ -18,7 +18,7 @@
         </div>
         
         <div id="mainApp" style="display: none;">
-            <!-- ✨ Mode Toggle -->
+            <!-- Mode Toggle -->
             <div class="mode-toggle">
                 <button class="mode-btn active" id="standardModeBtn" onclick="switchMode('standard')">
                     📝 Standard Mode
@@ -28,7 +28,7 @@
                 </button>
             </div>
 
-            <!-- Standard Mode (existing functionality) -->
+            <!-- Standard Mode -->
             <div id="standardMode" class="replacement-mode">
                 <div class="form-group">
                     <label for="findText">Find Text:</label>
@@ -39,7 +39,6 @@
                     <label for="replaceText">Replace With:</label>
                     <input type="text" id="replaceText" placeholder="Enter replacement text">
                     
-                    <!-- ✨ Confidence display area -->
                     <div id="confidenceArea" style="display: none; margin-top: 12px;">
                         <div class="confidence-indicator">
                             <div class="confidence-header">
@@ -60,7 +59,7 @@
                 </div>
             </div>
 
-            <!-- ✨ Smart Prompt Mode -->
+            <!-- Smart Prompt Mode -->
             <div id="smartMode" class="replacement-mode" style="display: none;">
                 <div class="form-group">
                     <label for="smartPrompt">Smart Replacement Command:</label>
@@ -80,7 +79,6 @@
                     </div>
                 </div>
 
-                <!-- ✨ Smart Prompt Results -->
                 <div id="smartResults" style="display: none;">
                     <div class="smart-operations">
                         <h4>🎯 Planned Operations:</h4>
@@ -111,12 +109,42 @@
         </div>
     </div>
 
-    <!-- Enhanced SDK Loading with Multiple Fallbacks -->
     <script>
         const API_URL = 'https://backend-f4ee.vercel.app';
         let currentSmartOperations = [];
 
-        // Method 1: Try loading from unpkg CDN
+        // ✨ SECURE METHOD: Notify parent page to refresh using postMessage
+        function requestParentPageRefresh() {
+            try {
+                // Method 1: Try postMessage to parent
+                window.parent.postMessage({
+                    type: 'CONTENTSTACK_REFRESH_REQUEST',
+                    source: 'smart-find-replace-app',
+                    action: 'refresh_page',
+                    timestamp: Date.now()
+                }, '*');
+                
+                console.log('Sent refresh request to parent page');
+                
+                // Method 2: Also try direct refresh as fallback
+                setTimeout(() => {
+                    try {
+                        if (window.parent && window.parent.location && window.parent.location.reload) {
+                            window.parent.location.reload();
+                        }
+                    } catch (e) {
+                        console.warn('Direct parent refresh blocked:', e);
+                        // Method 3: Fallback - show user notification
+                        showStatus('✅ Entry updated! Please refresh the Contentstack page to see changes.', 'success');
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Failed to request parent refresh:', error);
+                showStatus('✅ Entry updated! Please refresh the Contentstack page manually to see changes.', 'success');
+            }
+        }
+
         function loadSDK() {
             return new Promise((resolve, reject) => {
                 const script = document.createElement('script');
@@ -133,7 +161,6 @@
             });
         }
 
-        // Method 2: Alternative CDN source
         function loadSDKAlternative() {
             return new Promise((resolve, reject) => {
                 const script = document.createElement('script');
@@ -150,7 +177,6 @@
             });
         }
 
-        // Method 3: Check if SDK is available and initialize
         async function initializeApp() {
             try {
                 await loadSDK();
@@ -221,23 +247,6 @@
             }
         }
 
-        // ✨ NEW: Function to refresh the parent Contentstack page
-        function refreshParentPage() {
-            try {
-                if (window.parent && window.parent.location) {
-                    window.parent.location.reload();
-                } else {
-                    // Fallback: refresh current page if parent access fails
-                    window.location.reload();
-                }
-            } catch (error) {
-                console.warn('Could not refresh parent page:', error);
-                // Fallback: refresh current page
-                window.location.reload();
-            }
-        }
-
-        // ✨ Mode switching function
         function switchMode(mode) {
             const standardMode = document.getElementById('standardMode');
             const smartMode = document.getElementById('smartMode');
@@ -259,12 +268,10 @@
             }
         }
 
-        // ✨ Set example prompt
         function setExample(element) {
             document.getElementById('smartPrompt').value = element.textContent.trim();
         }
 
-        // ✨ Process smart prompt
         async function processSmartPrompt() {
             if (!window.currentEntryUID) {
                 showStatus('❌ No entry context', 'error');
@@ -303,7 +310,6 @@
             }
         }
 
-        // ✨ Display smart prompt results
         function displaySmartResults(data) {
             const smartResults = document.getElementById('smartResults');
             const operationsList = document.getElementById('operationsList');
@@ -346,20 +352,19 @@
             
             operationsList.innerHTML = operationsHTML;
             
-            // Brand status
             if (data.brandCompliant) {
                 brandStatus.innerHTML = '<div class="brand-success">✅ All operations are brand compliant</div>';
                 document.getElementById('executeBtn').disabled = false;
             } else {
                 brandStatus.innerHTML = '<div class="brand-warning">⚠️ Some operations may need brand review</div>';
-                document.getElementById('executeBtn').disabled = false; // Allow execution with warning
+                document.getElementById('executeBtn').disabled = false;
             }
             
             smartResults.style.display = 'block';
             showStatus('✨ Smart prompt processed successfully!', 'success');
         }
 
-        // ✨ UPDATED: Execute smart operations with PARENT PAGE REFRESH
+        // ✨ UPDATED: Execute smart operations with parent page refresh request
         async function executeSmartOperations() {
             if (!currentSmartOperations || currentSmartOperations.length === 0) {
                 showStatus('❌ No operations to execute', 'error');
@@ -382,13 +387,12 @@
                     const data = await response.json();
                     showStatus(`✅ ${data.message} (${data.operationsApplied} operations applied)`, 'success');
                     
-                    // Clear the form
                     document.getElementById('smartPrompt').value = '';
                     clearSmartResults();
                     
-                    // 🔄 REFRESH ENTIRE CONTENTSTACK PAGE: Reload parent window after 2 seconds
+                    // 🔄 REQUEST PARENT PAGE REFRESH
                     setTimeout(() => {
-                        refreshParentPage();
+                        requestParentPageRefresh();
                     }, 2000);
                 } else {
                     showStatus('❌ Failed to execute operations', 'error');
@@ -399,13 +403,11 @@
             }
         }
 
-        // ✨ Clear smart results
         function clearSmartResults() {
             document.getElementById('smartResults').style.display = 'none';
             currentSmartOperations = [];
         }
 
-        // ✨ Function to display AI confidence score
         function showConfidenceScore(confidence) {
             const confidenceArea = document.getElementById('confidenceArea');
             const confidenceScore = document.getElementById('confidenceScore');
@@ -435,7 +437,6 @@
             confidenceMessage.className = `confidence-message ${messageClass}`;
         }
 
-        // ✨ Enhanced getSuggestion with confidence display
         async function getSuggestion() {
             if (!window.currentEntryUID) {
                 showStatus('❌ No entry context', 'error');
@@ -481,7 +482,7 @@
             }
         }
 
-        // ✨ UPDATED: performReplace with PARENT PAGE REFRESH
+        // ✨ UPDATED: performReplace with parent page refresh request
         async function performReplace() {
             if (!window.currentEntryUID) {
                 showStatus('❌ No entry context', 'error');
@@ -510,14 +511,14 @@
                 });
 
                 if (response.ok) {
-                    showStatus('✅ Entry updated successfully! Refreshing Contentstack page...', 'success');
+                    showStatus('✅ Entry updated successfully!', 'success');
                     document.getElementById('findText').value = '';
                     document.getElementById('replaceText').value = '';
                     document.getElementById('confidenceArea').style.display = 'none';
                     
-                    // 🔄 REFRESH ENTIRE CONTENTSTACK PAGE: Reload parent window after 2 seconds
+                    // 🔄 REQUEST PARENT PAGE REFRESH
                     setTimeout(() => {
-                        refreshParentPage();
+                        requestParentPageRefresh();
                     }, 2000);
                 } else {
                     showStatus('❌ Failed to update entry', 'error');
@@ -537,7 +538,6 @@
             }
         }
 
-        // Start the app when page loads
         window.onload = initializeApp;
     </script>
 </body>
