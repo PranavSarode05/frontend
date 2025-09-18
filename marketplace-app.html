@@ -221,6 +221,22 @@
             }
         }
 
+        // ✨ NEW: Function to refresh the parent Contentstack page
+        function refreshParentPage() {
+            try {
+                if (window.parent && window.parent.location) {
+                    window.parent.location.reload();
+                } else {
+                    // Fallback: refresh current page if parent access fails
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.warn('Could not refresh parent page:', error);
+                // Fallback: refresh current page
+                window.location.reload();
+            }
+        }
+
         // ✨ Mode switching function
         function switchMode(mode) {
             const standardMode = document.getElementById('standardMode');
@@ -343,7 +359,7 @@
             showStatus('✨ Smart prompt processed successfully!', 'success');
         }
 
-        // ✨ UPDATED: Execute smart operations with AUTO-REFRESH
+        // ✨ UPDATED: Execute smart operations with PARENT PAGE REFRESH
         async function executeSmartOperations() {
             if (!currentSmartOperations || currentSmartOperations.length === 0) {
                 showStatus('❌ No operations to execute', 'error');
@@ -370,9 +386,9 @@
                     document.getElementById('smartPrompt').value = '';
                     clearSmartResults();
                     
-                    // 🔄 AUTO-REFRESH: Reload page after 2 seconds
+                    // 🔄 REFRESH ENTIRE CONTENTSTACK PAGE: Reload parent window after 2 seconds
                     setTimeout(() => {
-                        window.location.reload();
+                        refreshParentPage();
                     }, 2000);
                 } else {
                     showStatus('❌ Failed to execute operations', 'error');
@@ -465,7 +481,7 @@
             }
         }
 
-        // ✨ UPDATED: performReplace with AUTO-REFRESH
+        // ✨ UPDATED: performReplace with PARENT PAGE REFRESH
         async function performReplace() {
             if (!window.currentEntryUID) {
                 showStatus('❌ No entry context', 'error');
@@ -494,14 +510,14 @@
                 });
 
                 if (response.ok) {
-                    showStatus('✅ Entry updated successfully! Refreshing page...', 'success');
+                    showStatus('✅ Entry updated successfully! Refreshing Contentstack page...', 'success');
                     document.getElementById('findText').value = '';
                     document.getElementById('replaceText').value = '';
                     document.getElementById('confidenceArea').style.display = 'none';
                     
-                    // 🔄 AUTO-REFRESH: Reload page after 2 seconds
+                    // 🔄 REFRESH ENTIRE CONTENTSTACK PAGE: Reload parent window after 2 seconds
                     setTimeout(() => {
-                        window.location.reload();
+                        refreshParentPage();
                     }, 2000);
                 } else {
                     showStatus('❌ Failed to update entry', 'error');
