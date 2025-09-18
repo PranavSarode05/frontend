@@ -18,7 +18,7 @@
         </div>
         
         <div id="mainApp" style="display: none;">
-            <!-- ✨ NEW: Mode Toggle -->
+            <!-- ✨ Mode Toggle -->
             <div class="mode-toggle">
                 <button class="mode-btn active" id="standardModeBtn" onclick="switchMode('standard')">
                     📝 Standard Mode
@@ -60,7 +60,7 @@
                 </div>
             </div>
 
-            <!-- ✨ NEW: Smart Prompt Mode -->
+            <!-- ✨ Smart Prompt Mode -->
             <div id="smartMode" class="replacement-mode" style="display: none;">
                 <div class="form-group">
                     <label for="smartPrompt">Smart Replacement Command:</label>
@@ -221,7 +221,7 @@
             }
         }
 
-        // ✨ NEW: Mode switching function
+        // ✨ Mode switching function
         function switchMode(mode) {
             const standardMode = document.getElementById('standardMode');
             const smartMode = document.getElementById('smartMode');
@@ -243,12 +243,12 @@
             }
         }
 
-        // ✨ NEW: Set example prompt
+        // ✨ Set example prompt
         function setExample(element) {
             document.getElementById('smartPrompt').value = element.textContent.trim();
         }
 
-        // ✨ NEW: Process smart prompt
+        // ✨ Process smart prompt
         async function processSmartPrompt() {
             if (!window.currentEntryUID) {
                 showStatus('❌ No entry context', 'error');
@@ -287,7 +287,7 @@
             }
         }
 
-        // ✨ NEW: Display smart prompt results
+        // ✨ Display smart prompt results
         function displaySmartResults(data) {
             const smartResults = document.getElementById('smartResults');
             const operationsList = document.getElementById('operationsList');
@@ -343,7 +343,7 @@
             showStatus('✨ Smart prompt processed successfully!', 'success');
         }
 
-        // ✨ NEW: Execute smart operations
+        // ✨ UPDATED: Execute smart operations with AUTO-REFRESH
         async function executeSmartOperations() {
             if (!currentSmartOperations || currentSmartOperations.length === 0) {
                 showStatus('❌ No operations to execute', 'error');
@@ -369,6 +369,11 @@
                     // Clear the form
                     document.getElementById('smartPrompt').value = '';
                     clearSmartResults();
+                    
+                    // 🔄 AUTO-REFRESH: Reload page after 2 seconds
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
                 } else {
                     showStatus('❌ Failed to execute operations', 'error');
                 }
@@ -378,7 +383,7 @@
             }
         }
 
-        // ✨ NEW: Clear smart results
+        // ✨ Clear smart results
         function clearSmartResults() {
             document.getElementById('smartResults').style.display = 'none';
             currentSmartOperations = [];
@@ -414,7 +419,7 @@
             confidenceMessage.className = `confidence-message ${messageClass}`;
         }
 
-        // ✨ UPDATED: Enhanced getSuggestion with confidence display
+        // ✨ Enhanced getSuggestion with confidence display
         async function getSuggestion() {
             if (!window.currentEntryUID) {
                 showStatus('❌ No entry context', 'error');
@@ -460,6 +465,7 @@
             }
         }
 
+        // ✨ UPDATED: performReplace with AUTO-REFRESH
         async function performReplace() {
             if (!window.currentEntryUID) {
                 showStatus('❌ No entry context', 'error');
@@ -488,11 +494,15 @@
                 });
 
                 if (response.ok) {
-                    showStatus('✅ Entry updated successfully!', 'success');
+                    showStatus('✅ Entry updated successfully! Refreshing page...', 'success');
                     document.getElementById('findText').value = '';
                     document.getElementById('replaceText').value = '';
-                    
                     document.getElementById('confidenceArea').style.display = 'none';
+                    
+                    // 🔄 AUTO-REFRESH: Reload page after 2 seconds
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
                 } else {
                     showStatus('❌ Failed to update entry', 'error');
                 }
