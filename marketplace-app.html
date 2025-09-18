@@ -112,37 +112,119 @@
     <script>
         const API_URL = 'https://backend-f4ee.vercel.app';
         let currentSmartOperations = [];
+        let globalAppSDK = null; // Store SDK instance globally
 
-        // ✨ SECURE METHOD: Notify parent page to refresh using postMessage
-        function requestParentPageRefresh() {
+        // ✨ METHOD 1: SDK-based refresh function
+        async function refreshViaSDK() {
             try {
-                // Method 1: Try postMessage to parent
+                if (!window.ContentstackAppSDK) {
+                    throw new Error('ContentstackAppSDK not available');
+                }
+
+                // Use existing SDK instance or initialize new one
+                const appSdk = globalAppSDK || await ContentstackAppSDK.init();
+                
+                // Try different SDK refresh methods based on app location
+                if (appSdk.location?.CustomField?.frame?.reload) {
+                    console.log('🔄 Refreshing via CustomField SDK method');
+                    appSdk.location.CustomField.frame.reload();
+                    return true;
+                } else if (appSdk.location?.SidebarWidget?.frame?.reload) {
+                    console.log('🔄 Refreshing via SidebarWidget SDK method');
+                    appSdk.location.SidebarWidget.frame.reload();
+                    return true;
+                } else if (appSdk.location?.RTE?.frame?.reload) {
+                    console.log('🔄 Refreshing via RTE SDK method');
+                    appSdk.location.RTE.frame.reload();
+                    return true;
+                } else if (appSdk.location?.ContentTypeField?.frame?.reload) {
+                    console.log('🔄 Refreshing via ContentTypeField SDK method');
+                    appSdk.location.ContentTypeField.frame.reload();
+                    return true;
+                } else {
+                    throw new Error('No SDK refresh method found');
+                }
+            } catch (error) {
+                console.warn('SDK refresh failed:', error);
+                throw error;
+            }
+        }
+
+        // ✨ Fallback refresh methods
+        function refreshViaParent() {
+            try {
+                if (window.parent && window.parent.location && window.parent !== window) {
+                    console.log('🔄 Refreshing via parent window');
+                    window.parent.location.reload();
+                    return true;
+                }
+                throw new Error('Parent window not accessible');
+            } catch (error) {
+                console.warn('Parent refresh failed:', error);
+                throw error;
+            }
+        }
+
+        function refreshViaPostMessage() {
+            try {
+                console.log('🔄 Requesting refresh via postMessage');
                 window.parent.postMessage({
                     type: 'CONTENTSTACK_REFRESH_REQUEST',
                     source: 'smart-find-replace-app',
-                    action: 'refresh_page',
                     timestamp: Date.now()
                 }, '*');
-                
-                console.log('Sent refresh request to parent page');
-                
-                // Method 2: Also try direct refresh as fallback
-                setTimeout(() => {
-                    try {
-                        if (window.parent && window.parent.location && window.parent.location.reload) {
-                            window.parent.location.reload();
-                        }
-                    } catch (e) {
-                        console.warn('Direct parent refresh blocked:', e);
-                        // Method 3: Fallback - show user notification
-                        showStatus('✅ Entry updated! Please refresh the Contentstack page to see changes.', 'success');
-                    }
-                }, 1000);
-                
+                return true;
             } catch (error) {
-                console.error('Failed to request parent refresh:', error);
-                showStatus('✅ Entry updated! Please refresh the Contentstack page manually to see changes.', 'success');
+                console.warn('PostMessage refresh failed:', error);
+                throw error;
             }
+        }
+
+        // ✨ MASTER REFRESH FUNCTION with multiple fallback methods
+        async function refreshContentstackPage() {
+            console.log('🔄 Attempting to refresh Contentstack page...');
+            
+            // Method 1: Try SDK refresh first
+            try {
+                const success = await refreshViaSDK();
+                if (success) {
+                    console.log('✅ SDK refresh successful');
+                    return;
+                }
+            } catch (error) {
+                console.log('❌ SDK refresh failed, trying fallback methods...');
+            }
+
+            // Method 2: Try direct parent refresh
+            try {
+                const success = refreshViaParent();
+                if (success) {
+                    console.log('✅ Parent refresh successful');
+                    return;
+                }
+            } catch (error) {
+                console.log('❌ Parent refresh failed, trying postMessage...');
+            }
+
+            // Method 3: Try postMessage
+            try {
+                const success = refreshViaPostMessage();
+                if (success) {
+                    console.log('✅ PostMessage sent successfully');
+                    // Show user instruction as postMessage success doesn't guarantee refresh
+                    setTimeout(() => {
+                        showStatus('✅ Entry updated! Please refresh the page (F5) if changes are not visible.', 'success');
+                    }, 3000);
+                    return;
+                }
+            } catch (error) {
+                console.log('❌ PostMessage failed');
+            }
+
+            // Method 4: Show user instruction as final fallback
+            setTimeout(() => {
+                showStatus('✅ Entry updated! Please refresh the page (F5) to see changes in the editor.', 'success');
+            }, 1000);
         }
 
         function loadSDK() {
@@ -189,6 +271,7 @@
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 
                 const appSdk = await ContentstackAppSDK.init();
+                globalAppSDK = appSdk; // Store SDK instance globally
                 console.log('✅ App SDK initialized');
                 
                 let entryData = null;
@@ -364,7 +447,7 @@
             showStatus('✨ Smart prompt processed successfully!', 'success');
         }
 
-        // ✨ UPDATED: Execute smart operations with parent page refresh request
+        // ✨ UPDATED: Execute smart operations with SDK refresh
         async function executeSmartOperations() {
             if (!currentSmartOperations || currentSmartOperations.length === 0) {
                 showStatus('❌ No operations to execute', 'error');
@@ -390,9 +473,9 @@
                     document.getElementById('smartPrompt').value = '';
                     clearSmartResults();
                     
-                    // 🔄 REQUEST PARENT PAGE REFRESH
-                    setTimeout(() => {
-                        requestParentPageRefresh();
+                    // 🔄 SDK-BASED REFRESH with fallbacks
+                    setTimeout(async () => {
+                        await refreshContentstackPage();
                     }, 2000);
                 } else {
                     showStatus('❌ Failed to execute operations', 'error');
@@ -482,7 +565,7 @@
             }
         }
 
-        // ✨ UPDATED: performReplace with parent page refresh request
+        // ✨ UPDATED: performReplace with SDK refresh
         async function performReplace() {
             if (!window.currentEntryUID) {
                 showStatus('❌ No entry context', 'error');
@@ -516,9 +599,9 @@
                     document.getElementById('replaceText').value = '';
                     document.getElementById('confidenceArea').style.display = 'none';
                     
-                    // 🔄 REQUEST PARENT PAGE REFRESH
-                    setTimeout(() => {
-                        requestParentPageRefresh();
+                    // 🔄 SDK-BASED REFRESH with fallbacks
+                    setTimeout(async () => {
+                        await refreshContentstackPage();
                     }, 2000);
                 } else {
                     showStatus('❌ Failed to update entry', 'error');
@@ -534,7 +617,7 @@
             statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
             
             if (type === 'success' || type === 'info') {
-                setTimeout(() => statusDiv.innerHTML = '', 4000);
+                setTimeout(() => statusDiv.innerHTML = '', 6000);
             }
         }
 
