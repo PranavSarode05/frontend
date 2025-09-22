@@ -76,11 +76,13 @@ This repository contains the frontend implementation of an AI-powered content re
 ## Installation
 
 Clone this repository:
+
 git clone https://github.com/PranavSarode05/frontend.git
 
 
 Navigate to the project directory:
-cd smart-find-replace-frontend
+
+cd frontend
 
 
 Configure the API endpoint in marketplace-app.html:
