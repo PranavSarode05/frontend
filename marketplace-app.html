@@ -28,7 +28,6 @@
                 </button>
             </div>
 
-            <!-- Standard Mode -->
             <div id="standardMode" class="replacement-mode">
                 <div class="form-group">
                     <label for="findText">Find Text:</label>
@@ -59,7 +58,6 @@
                 </div>
             </div>
 
-            <!-- Smart Prompt Mode -->
             <div id="smartMode" class="replacement-mode" style="display: none;">
                 <div class="form-group">
                     <label for="smartPrompt">Smart Replacement Command:</label>
@@ -114,17 +112,14 @@
         let currentSmartOperations = [];
         let globalAppSDK = null; // Store SDK instance globally
 
-        // ✨ METHOD 1: SDK-based refresh function
         async function refreshViaSDK() {
             try {
                 if (!window.ContentstackAppSDK) {
                     throw new Error('ContentstackAppSDK not available');
                 }
 
-                // Use existing SDK instance or initialize new one
                 const appSdk = globalAppSDK || await ContentstackAppSDK.init();
                 
-                // Try different SDK refresh methods based on app location
                 if (appSdk.location?.CustomField?.frame?.reload) {
                     console.log('🔄 Refreshing via CustomField SDK method');
                     appSdk.location.CustomField.frame.reload();
@@ -150,7 +145,6 @@
             }
         }
 
-        // ✨ Fallback refresh methods
         function refreshViaParent() {
             try {
                 if (window.parent && window.parent.location && window.parent !== window) {
@@ -180,7 +174,6 @@
             }
         }
 
-        // ✨ MASTER REFRESH FUNCTION with multiple fallback methods
         async function refreshContentstackPage() {
             console.log('🔄 Attempting to refresh Contentstack page...');
             
@@ -195,7 +188,6 @@
                 console.log('❌ SDK refresh failed, trying fallback methods...');
             }
 
-            // Method 2: Try direct parent refresh
             try {
                 const success = refreshViaParent();
                 if (success) {
@@ -206,12 +198,10 @@
                 console.log('❌ Parent refresh failed, trying postMessage...');
             }
 
-            // Method 3: Try postMessage
             try {
                 const success = refreshViaPostMessage();
                 if (success) {
                     console.log('✅ PostMessage sent successfully');
-                    // Show user instruction as postMessage success doesn't guarantee refresh
                     setTimeout(() => {
                         showStatus('✅ Entry updated! Please refresh the page (F5) if changes are not visible.', 'success');
                     }, 3000);
@@ -221,7 +211,7 @@
                 console.log('❌ PostMessage failed');
             }
 
-            // Method 4: Show user instruction as final fallback
+      
             setTimeout(() => {
                 showStatus('✅ Entry updated! Please refresh the page (F5) to see changes in the editor.', 'success');
             }, 1000);
@@ -271,7 +261,7 @@
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 
                 const appSdk = await ContentstackAppSDK.init();
-                globalAppSDK = appSdk; // Store SDK instance globally
+                globalAppSDK = appSdk;
                 console.log('✅ App SDK initialized');
                 
                 let entryData = null;
@@ -447,7 +437,7 @@
             showStatus('✨ Smart prompt processed successfully!', 'success');
         }
 
-        // ✨ UPDATED: Execute smart operations with SDK refresh
+        
         async function executeSmartOperations() {
             if (!currentSmartOperations || currentSmartOperations.length === 0) {
                 showStatus('❌ No operations to execute', 'error');
@@ -473,7 +463,6 @@
                     document.getElementById('smartPrompt').value = '';
                     clearSmartResults();
                     
-                    // 🔄 SDK-BASED REFRESH with fallbacks
                     setTimeout(async () => {
                         await refreshContentstackPage();
                     }, 2000);
@@ -565,7 +554,7 @@
             }
         }
 
-        // ✨ UPDATED: performReplace with SDK refresh
+    
         async function performReplace() {
             if (!window.currentEntryUID) {
                 showStatus('❌ No entry context', 'error');
@@ -599,7 +588,7 @@
                     document.getElementById('replaceText').value = '';
                     document.getElementById('confidenceArea').style.display = 'none';
                     
-                    // 🔄 SDK-BASED REFRESH with fallbacks
+        
                     setTimeout(async () => {
                         await refreshContentstackPage();
                     }, 2000);
