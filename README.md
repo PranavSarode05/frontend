@@ -86,8 +86,9 @@ cd frontend
 ```
 
 Configure the API endpoint in marketplace-app.html:
+```bash
 const API_URL = 'https://backend-f4ee.vercel.app';
-
+```
 
 Deploy to Contentstack Launch or your preferred hosting platform.
 
