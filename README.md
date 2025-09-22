@@ -76,28 +76,25 @@ This repository contains the frontend implementation of an AI-powered content re
 ## Installation
 
 Clone this repository:
-
 ```bash
 git clone https://github.com/PranavSarode05/frontend.git
+```
+
 Navigate to the project directory:
-
-bash
-Copy code
+```bash
 cd frontend
-Configure the API endpoint in marketplace-app.html:
+```
 
-javascript
-Copy code
+Configure the API endpoint in marketplace-app.html:
 const API_URL = 'https://backend-f4ee.vercel.app';
+
+
 Deploy to Contentstack Launch or your preferred hosting platform.
 
 Set up the backend API with required environment variables:
-
-Contentstack API credentials
-
-Google Gemini API key
-
-Brandkit JSON file for compliance validation
+- Contentstack API credentials
+- Google Gemini API key
+- Brandkit JSON file for compliance validation
 
 ## Related Repositories
 
